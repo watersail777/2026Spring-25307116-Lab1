@@ -1,0 +1,53 @@
+{
+  "lockVersion": "1.0",
+  "settings": {
+    "resolveConflict": true,
+    "resolveConflictStrict": false,
+    "installAll": true
+  },
+  "overrides": {},
+  "overrideDependencyMap": {},
+  "modules": {
+    ".": {
+      "name": "",
+      "dependencies": {
+        "cjcalendar": {
+          "specifier": "^2.0.4",
+          "version": "2.0.4"
+        }
+      },
+      "devDependencies": {},
+      "dynamicDependencies": {},
+      "maskedByOverrideDependencyMap": false
+    },
+    "entry": {
+      "name": "entry",
+      "dependencies": {},
+      "devDependencies": {},
+      "dynamicDependencies": {},
+      "maskedByOverrideDependencyMap": false
+    }
+  },
+  "packages": {
+    "cjcalendar@2.0.4": {
+      "integrity": "sha512-eFRtcL09BmxAnDSJkZc/B5JJC5cI/zDwcI++h7Xiv49Jkh4lqJd9A21W5s2/n3+ZH5fUuACMQnNIqn6Mb2bWcg==",
+      "storePath": "oh_modules/.ohpm/cjcalendar@2.0.4",
+      "dependencies": {
+        "lunar": "1.0.0"
+      },
+      "dynamicDependencies": {},
+      "dev": false,
+      "dynamic": false,
+      "maskedByOverrideDependencyMap": false
+    },
+    "lunar@1.0.0": {
+      "integrity": "sha512-sAMOxbVr7Sn/QEzEQZHz0CwYjOROTgDLc4842CX2d7f+1D2nlHc6T5jtZJoleIMPZItNJLj0GuOaB/JR+Iwe7Q==",
+      "storePath": "oh_modules/.ohpm/lunar@1.0.0",
+      "dependencies": {},
+      "dynamicDependencies": {},
+      "dev": false,
+      "dynamic": false,
+      "maskedByOverrideDependencyMap": false
+    }
+  }
+}
