@@ -27,6 +27,8 @@ import { HealthDataSrcMgr } from '../common/utils/HealthDataSrcMgr';
 import { BroadCast, BroadCastType } from '../common/utils/BroadCast';
 import { CommonConstants as Const } from '../common/constants/CommonConstants';
 import AchievementInfo from '../viewmodel/AchievementInfo';
+import KnowledgeCard from './KnowledgeCard';
+import { KnowledgeItem, getDailyKnowledge } from '../model/KnowledgeData';
 
 const WHITE_COLOR_0X = 255;
 
@@ -57,6 +59,7 @@ export default struct HomeIndex {
   @Link homeStore: HomeStore; // 核心類
   @Link editedTaskInfo: ITaskItem;
   @Link @Watch('taskChange') editedTaskID: string;
+  @State dailyKnowledge: KnowledgeItem = getDailyKnowledge();
   private scroller: Scroller = new Scroller();
   private yOffset: number = 0;
 
@@ -128,6 +131,9 @@ export default struct HomeIndex {
         Column() {
           // 進度 日曆
           HomeTopView({ homeStore: $homeStore }) //傳進去
+          //
+          // 每日健康知识卡片
+          KnowledgeCard({ knowledge: this.dailyKnowledge })
           //
           Text($r('app.string.task_list')).titleTextStyle()
           //
