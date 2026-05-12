@@ -23,6 +23,7 @@ import { NavList, TabId } from '../model/NavItemModel';
 // 导航栏的三个 咱们
 import HomeIndex from '../view/HomeComponent';
 import { AchievementIndex } from '../view/AchievementComponent';
+import { StatsIndex } from './StatsPage';
 import { MineIndex } from './MinePage';
 // home存储类
 import { HomeStore } from '../viewmodel/HomeViewModel';
@@ -143,6 +144,11 @@ struct Index {
         AchievementIndex()
       }
       .tabBar(this.TabBuilder(TabId.ACHIEVEMENT))
+
+      TabContent() {
+        StatsIndex()
+      }
+      .tabBar(this.TabBuilder(TabId.STATS))
 
       TabContent() {
         MineIndex({

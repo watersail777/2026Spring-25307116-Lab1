@@ -229,6 +229,10 @@
       "value": "Used to publish/cancel task reminders"
     },
     {
+      "name": "tab_stats",
+      "value": "统计"
+    },
+    {
       "name": "empty",
       "value": "empty"
     }
