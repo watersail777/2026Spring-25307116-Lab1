@@ -29,6 +29,7 @@ import FormUtils from '../common/utils/FormUtils';
 import { GlobalContext } from '../common/utils/GlobalContext';
 import SelfInfoApi from '../common/database/tables/SelfInfoApi';
 import SelfInfo from '../viewmodel/SelfInfo';
+import { initCustomTaskCache } from '../model/CustomTaskStore';
 
 export const selfInfo: SelfInfo = new SelfInfo();
 
@@ -38,6 +39,7 @@ export default class EntryAbility extends UIAbility {
   async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
     GlobalContext.getContext().setObject('want', want);
     GlobalContext.getContext().setObject('launchParam', launchParam);
+    GlobalContext.getContext().setObject('context', this.context);
 
     RdbUtils.initDb(this.context, Const.RDB_NAME.dbName ? Const.RDB_NAME.dbName : '');
     await RdbUtils.createDb();
@@ -75,6 +77,11 @@ export default class EntryAbility extends UIAbility {
       if (isDone) {
         Logger.info('EntryAbility' + 'Insert selfInfo success');
       }});
+
+    // 初始化自定义任务缓存
+    initCustomTaskCache().then(() => {
+      Logger.info('EntryAbility', 'CustomTaskCache initialized');
+    });
   }
   // UI页面管理器
   onWindowStageCreate(windowStage: window.WindowStage) {

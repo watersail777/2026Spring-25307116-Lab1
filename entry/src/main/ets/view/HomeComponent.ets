@@ -29,6 +29,7 @@ import { CommonConstants as Const } from '../common/constants/CommonConstants';
 import AchievementInfo from '../viewmodel/AchievementInfo';
 import KnowledgeCard from './KnowledgeCard';
 import { KnowledgeItem, getDailyKnowledge } from '../model/KnowledgeData';
+import { CustomTaskDef, getCustomTaskSync, initCustomTaskCache } from '../model/CustomTaskStore';
 
 const WHITE_COLOR_0X = 255;
 
@@ -131,6 +132,22 @@ export default struct HomeIndex {
     }
   }
 
+  getTaskDisplayName(taskID: number): string {
+    if (taskID >= 8) {
+      const def: CustomTaskDef | null = getCustomTaskSync(taskID);
+      return def ? def.taskName : '';
+    }
+    return '';
+  }
+
+  getTaskDisplayIcon(taskID: number): string {
+    if (taskID >= 8) {
+      const def: CustomTaskDef | null = getCustomTaskSync(taskID);
+      return def ? def.icon : '';
+    }
+    return '';
+  }
+
   build() {
     Stack() {
       Scroll(this.scroller) {
@@ -149,6 +166,8 @@ export default struct HomeIndex {
               ForEach(this.homeStore.getTaskListOfDay(), (item: TaskInfo) => {
                 TaskCard({
                   taskInfoStr: JSON.stringify(item),
+                  customTaskName: this.getTaskDisplayName(item.taskID),
+                  customTaskIcon: this.getTaskDisplayIcon(item.taskID),
                   clickAction: (isClick: boolean) => this.taskItemAction(item, isClick)
                 })
                   .margin({ bottom: Const.DEFAULT_12 })

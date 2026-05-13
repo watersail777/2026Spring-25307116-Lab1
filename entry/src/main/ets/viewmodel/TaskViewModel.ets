@@ -60,8 +60,13 @@ const useReminder = (params: TaskInfo, context: Context) => {
     publishReminderInfo.hour = Number(params?.startTime.split(':')[0]);
     publishReminderInfo.minute = Number(params?.startTime.split(':')[1]);
     publishReminderInfo.daysOfWeek = params?.frequency.split(',').map(item => Number(item));
-    publishReminderInfo.title = RemindContentMap[params?.taskID - 1].title;
-    publishReminderInfo.content = RemindContentMap[params?.taskID - 1].content;
+    if (params.taskID >= 1 && params.taskID <= 6) {
+      publishReminderInfo.title = RemindContentMap[params?.taskID - 1].title;
+      publishReminderInfo.content = RemindContentMap[params?.taskID - 1].content;
+    } else {
+      publishReminderInfo.title = '自定义任务提醒';
+      publishReminderInfo.content = '该完成你的自定义任务啦！';
+    }
     publishReminderInfo.notificationId = params?.taskID;
     publishReminder(publishReminderInfo, context);
   } catch (error) {
@@ -120,24 +125,46 @@ export const addTask = (params: TaskInfo, context: Context) => {
         }
       });
     }
-    TaskInfoApi.updateDataByDate(params, (flag: number) => {
-      if (!flag) {
-        Logger.error('insertTaskSetting', 'updateTaskSetting Error!');
-        reject(flag);
-      }
-      resolve(flag);
-    });
-    let taskInfoStr = JSON.stringify(params);
-    let taskInfo: TaskInfo = JSON.parse(taskInfoStr);
-    taskInfo.date = new Date().toDateString();
-    taskInfo.isDone = params.isDone;
-    TaskInfoApi.updateDataByDate(taskInfo, (flag: number) => {
-      if (!flag) {
-        Logger.error('insertTaskSetting', 'updateTaskSetting Error!');
-        reject(flag);
-      }
-      resolve(flag);
-    });
+    // 自定义任务先插入，预设任务直接更新
+    if (params.taskID >= 8) {
+      // 自定义任务：先插入global模板，再插入今日实例
+      let globalTask: TaskInfo = JSON.parse(JSON.stringify(params));
+      globalTask.date = Const.GLOBAL_KEY;
+      TaskInfoApi.insertData(globalTask, (insertFlag: number) => {
+        if (!insertFlag) {
+          // insert失败则update（可能已存在）
+          TaskInfoApi.updateDataByDate(globalTask, () => {});
+        }
+      });
+      let todayTask: TaskInfo = JSON.parse(JSON.stringify(params));
+      todayTask.date = new Date().toDateString();
+      todayTask.isDone = params.isDone;
+      TaskInfoApi.insertData(todayTask, (insertFlag: number) => {
+        if (!insertFlag) {
+          TaskInfoApi.updateDataByDate(todayTask, () => {});
+        }
+        resolve(insertFlag || 1);
+      });
+    } else {
+      TaskInfoApi.updateDataByDate(params, (flag: number) => {
+        if (!flag) {
+          Logger.error('insertTaskSetting', 'updateTaskSetting Error!');
+          reject(flag);
+        }
+        resolve(flag);
+      });
+      let taskInfoStr = JSON.stringify(params);
+      let taskInfo: TaskInfo = JSON.parse(taskInfoStr);
+      taskInfo.date = new Date().toDateString();
+      taskInfo.isDone = params.isDone;
+      TaskInfoApi.updateDataByDate(taskInfo, (flag: number) => {
+        if (!flag) {
+          Logger.error('insertTaskSetting', 'updateTaskSetting Error!');
+          reject(flag);
+        }
+        resolve(flag);
+      });
+    }
   });
 }
 
