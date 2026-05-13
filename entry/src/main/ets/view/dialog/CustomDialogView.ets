@@ -15,6 +15,7 @@
 
 import { AchievementDialog } from './AchievementDialog';
 import { TaskDetailDialog } from './TaskDetailDialog';
+import { SharePosterDialog } from './SharePosterDialog';
 import { BroadCast, BroadCastType } from '../../common/utils/BroadCast';
 import { TaskItem } from '../../model/TaskInitList';
 import TaskInfo from '../../viewmodel/TaskInfo';
@@ -48,6 +49,13 @@ export struct CustomDialogView {
     autoCancel: true,
     customStyle: true
   });
+  // share poster dialog
+  posterDialog: CustomDialogController = new CustomDialogController({
+    builder: SharePosterDialog({ homeStore: $homeStore }),
+    autoCancel: true,
+    customStyle: true,
+    alignment: DialogAlignment.Bottom
+  });
 
   aboutToAppear() {
     Logger.debug('CustomDialogView', 'aboutToAppear');
@@ -66,6 +74,12 @@ export struct CustomDialogView {
         this.dialogCallBack = dialogCallBack;
         this.taskDialog.open();
       });
+
+    // share poster dialog
+    this.broadCast.on(BroadCastType.SHOW_SHARE_POSTER_DIALOG, () => {
+      Logger.debug('CustomDialogView', 'SHOW_SHARE_POSTER_DIALOG');
+      this.posterDialog.open();
+    });
   }
 
   aboutToDisappear() {

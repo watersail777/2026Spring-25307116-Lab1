@@ -43,6 +43,9 @@ export class BroadCast {
       case BroadCastType.SHOW_FREQUENCY_DIALOG:
         this.callBackArray.showFrequencyDialog = callback;
         break;
+      case BroadCastType.SHOW_SHARE_POSTER_DIALOG:
+        this.callBackArray.showSharePosterDialog = callback;
+        break;
       default:
         break;
     }
@@ -75,6 +78,9 @@ export class BroadCast {
         case BroadCastType.SHOW_FREQUENCY_DIALOG:
           this.callBackArray.showFrequencyDialog = () => {};
           break;
+        case BroadCastType.SHOW_SHARE_POSTER_DIALOG:
+          this.callBackArray.showSharePosterDialog = () => {};
+          break;
         default:
           break;
       }
@@ -104,6 +110,9 @@ export class BroadCast {
       case BroadCastType.SHOW_FREQUENCY_DIALOG:
         cbs = [this.callBackArray.showFrequencyDialog];
         break;
+      case BroadCastType.SHOW_SHARE_POSTER_DIALOG:
+        cbs = [this.callBackArray.showSharePosterDialog];
+        break;
       default:
         break;
     }
@@ -129,5 +138,6 @@ export enum BroadCastType {
   SHOW_TASK_DETAIL_DIALOG = 'showTaskDetailDialog',
   SHOW_TARGET_SETTING_DIALOG = 'showTargetSettingDialog',
   SHOW_REMIND_TIME_DIALOG = 'showRemindTimeDialog',
-  SHOW_FREQUENCY_DIALOG = 'showFrequencyDialog'
+  SHOW_FREQUENCY_DIALOG = 'showFrequencyDialog',
+  SHOW_SHARE_POSTER_DIALOG = 'showSharePosterDialog'
 }

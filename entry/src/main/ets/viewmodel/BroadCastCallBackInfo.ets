@@ -22,4 +22,5 @@ export default class BroadCastCallBackInfo {
    showTargetSettingDialog: Function = () => {};
    showRemindTimeDialog: Function = () => {};
    showFrequencyDialog: Function = () => {};
+   showSharePosterDialog: Function = () => {};
 }
