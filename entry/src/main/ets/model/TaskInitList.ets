@@ -31,6 +31,10 @@ export interface ITaskItem {
   isInit: boolean;
   step: number;
   finValue:string;
+  // 自定义任务扩展字段
+  customName?: string;
+  customIcon?: string;
+  customUnit?: string;
 }
 
 export interface RemindContentItem {
