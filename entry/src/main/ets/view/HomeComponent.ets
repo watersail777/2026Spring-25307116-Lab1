@@ -105,7 +105,11 @@ export default struct HomeIndex {
         } else {
           this.broadCast.emit(BroadCastType.SHOW_ACHIEVEMENT_DIALOG);
         }
-        // 全部任务完成时，额外弹出分享海报
+      }
+      // 全部任务完成时弹出分享海报
+      const dayInfo = this.homeStore.selectedDayInfo?.dayInfo;
+      if (dayInfo && dayInfo.targetTaskNum > 0 &&
+          dayInfo.finTaskNum >= dayInfo.targetTaskNum) {
         this.broadCast.emit(BroadCastType.SHOW_SHARE_POSTER_DIALOG);
       }
     })
