@@ -10,6 +10,7 @@ import { dateToStr, weekDateFormat } from '../../common/utils/Utils';
 import GlobalInfoApi from '../../common/database/tables/GlobalInfoApi';
 import GlobalInfo from '../../viewmodel/GlobalInfo';
 import Logger from '../../common/utils/Logger';
+import { getCustomTaskSync } from '../../model/CustomTaskStore';
 
 @Component
 export struct SharePosterContent {
@@ -192,8 +193,13 @@ export struct SharePosterContent {
   }
 
   private getTaskName(taskID: number): string {
-    const names: string[] = ['', '早起', '喝水', '吃苹果', '每日微笑', '每日刷牙', '早睡', '跑步'];
-    return taskID >= 1 && taskID <= 7 ? names[taskID] : '未知任务';
+    const presetNames: string[] = ['', '早起', '喝水', '吃苹果', '每日微笑', '每日刷牙', '早睡', '跑步'];
+    if (taskID >= 1 && taskID <= 7) {
+      return presetNames[taskID];
+    }
+    // 自定义任务从缓存查名
+    const customDef = getCustomTaskSync(taskID);
+    return customDef ? customDef.taskName : '自定义任务';
   }
 }
 
