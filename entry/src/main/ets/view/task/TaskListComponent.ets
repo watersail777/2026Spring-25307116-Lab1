@@ -71,12 +71,16 @@ export default struct TaskList {
         .height(Const.THOUSANDTH_80)
         .borderRadius(Const.DEFAULT_12)
         .onClick(() => {
-          router.pushUrl({
-            url: 'pages/TaskEditPage',
-            params: {
-              params: formatParams(item)
-            }
-          })
+          if (item.taskID === 0) {
+            router.pushUrl({ url: 'pages/CustomTaskCreatePage' });
+          } else {
+            router.pushUrl({
+              url: 'pages/TaskEditPage',
+              params: {
+                params: formatParams(item)
+              }
+            })
+          }
         })
         .backgroundColor($r('app.color.white'))
       }, (item: ITaskItem) => JSON.stringify(item))

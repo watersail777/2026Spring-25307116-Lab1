@@ -16,6 +16,7 @@
 import { CommonConstants as Const } from '../common/constants/CommonConstants';
 import { isReachNewAchievement, ACHIEVEMENT_LEVEL_KEY } from '../model/AchieveModel';
 import { TaskMapById, ITaskItem, ACHIEVEMENT_LEVEL_LIST } from '../model/TaskInitList';
+import { getCustomTaskSync } from '../model/CustomTaskStore';
 import TaskInfo from './TaskInfo';
 import DayInfo from './DayInfo';
 import { dateToStr, weekDateFormat } from '../common/utils/Utils';
@@ -319,7 +320,13 @@ export class HomeStore {
       let finValue = task.finValue;
       let updateTask = new TaskInfo(task.id, task.date, taskID, targetValue, task.isAlarm, task.startTime,
         task.endTime, task.frequency, task.isDone, finValue, task.isOpen);
-      let step = TaskMapById[taskID - 1].step;
+      let step: number = 0;
+      if (taskID >= 1 && taskID <= 7) {
+        step = TaskMapById[taskID - 1].step;
+      } else {
+        const customDef = getCustomTaskSync(taskID);
+        step = customDef ? customDef.step : 1;
+      }
       let hasExceed = updateTask.isDone;
       if (step === 0) {
         updateTask.isDone = true;
