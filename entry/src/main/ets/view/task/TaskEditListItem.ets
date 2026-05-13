@@ -53,7 +53,11 @@ export struct TaskChooseItem {
 
   build() {
     Row() {
-      Text(this.settingParams.taskName).fontSize(Const.DEFAULT_20).fontWeight(FontWeight.Medium)
+      if (this.settingParams?.customName) {
+        Text(this.settingParams.customName).fontSize(Const.DEFAULT_20).fontWeight(FontWeight.Medium)
+      } else {
+        Text(this.settingParams.taskName).fontSize(Const.DEFAULT_20).fontWeight(FontWeight.Medium)
+      }
       Toggle({ type: ToggleType.Switch, isOn: this.settingParams.isOpen })
         .width(Const.DEFAULT_56)
         .height(Const.DEFAULT_32)

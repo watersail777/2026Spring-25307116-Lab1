@@ -100,7 +100,7 @@ export class DatabaseModel {
           dayInfo.targetTaskNum = this.calTaskNum(result);
           this.insertPreInfo(curDate, finDate, result, dayInfo);
           let finResult: TaskInfo[] = [];
-          for (let i = 0; i < 6; i++) {
+          for (let i = 0; i < result.length; i++) {
             if (result[i].isOpen === true) {
               finResult.push(result[i]);
             }
@@ -118,7 +118,7 @@ export class DatabaseModel {
 
   calTaskNum(result: TaskInfo[]) {
     let taskNum = 0;
-    for (let i = 0; i < Const.TASK_NUM; i++) {
+    for (let i = 0; i < result.length; i++) {
       if (result[i]?.isOpen) {
         taskNum += 1;
       }
@@ -134,7 +134,7 @@ export class DatabaseModel {
           Logger.info('AppStart', 'insert dayInfo success: ' + JSON.stringify(dayInfo));
         }
       })
-      for (let i = 0; i < Const.TASK_NUM; i++) {
+      for (let i = 0; i < result.length; i++) {
         let tmp = new TaskInfo(0, '', 0, '', false, '', '', '', false, '');
         tmp = result[i];
         tmp.date = curDate.toDateString();
@@ -151,7 +151,7 @@ export class DatabaseModel {
   calFinishNum(taskResult: TaskInfo[], result: TaskInfo[]) {
     let taskNum = 0;
     let finishNum = 0;
-    for (let i = 0; i < Const.TASK_NUM; i++) {
+    for (let i = 0; i < taskResult.length; i++) {
       if (taskResult[i].isOpen) {
         result.push(taskResult[i]);
         taskNum += 1;
