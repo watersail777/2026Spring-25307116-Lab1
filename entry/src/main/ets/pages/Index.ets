@@ -35,13 +35,13 @@ struct Index {
       // ── 内容区 ──
       Column() {
         if (this.vm.currentTab === 0) {
-          BrowseTab({ vm: this.vm })
+          BrowseTab({ vm: this.vm })          // 今日
         } else if (this.vm.currentTab === 1) {
-          FavoritesTab({ vm: this.vm })
+          BrowseTab({ vm: this.vm })          // 发现（复用浏览，后续替换为独立网格页）
         } else if (this.vm.currentTab === 2) {
-          NearbyTab({ vm: this.vm })
+          FavoritesTab({ vm: this.vm })       // 书签
         } else {
-          ProfileTab({ vm: this.vm })
+          ProfileTab({ vm: this.vm })         // 我的
         }
       }
       .width('100%').layoutWeight(1)

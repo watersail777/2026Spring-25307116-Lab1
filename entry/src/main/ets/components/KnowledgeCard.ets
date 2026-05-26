@@ -1,76 +1,100 @@
 import { KnowledgeItem } from '../model/KnowledgeItem'
+import { CardGradient } from '../model/AppViewModel'
 
-@Component
+// ═══════════════════════════════════════
+// 知识卡片 — 1:1 复刻 arkui-2 Frame_2_1116
+// ═══════════════════════════════════════
+
+@ComponentV2
 export struct KnowledgeCard {
-  @Prop card: KnowledgeItem
-  @Prop gradientStart: string = '#dcd0f0'
-  @Prop gradientEnd: string = '#c8b8e4'
+  @Require @Param card: KnowledgeItem
+  @Require @Param gradient: CardGradient
+  @Param showActions: boolean = true
+  @Event onFavorite?: () => void
+  @Event onLike?: () => void
+  @Event onShare?: () => void
 
   build() {
-    Stack({ alignContent: Alignment.TopStart }) {
-      // 底层：满铺柔和渐变
-      Column()
-        .width('100%').height('100%').borderRadius(22)
-        .linearGradient({
-          direction: GradientDirection.Bottom,
-          colors: [[this.gradientStart + '99', 0.0], [this.gradientEnd, 0.55], [this.gradientStart + '44', 1.0]]
-        })
-
-      // 图片区 — 顶部 38%
-      if (this.card.imageUrl.length > 0) {
-        Column() {
-          Image(this.card.imageUrl)
-            .width('100%').height('38%')
-            .objectFit(ImageFit.Cover)
-            .borderRadius({ topLeft: 22, topRight: 22 })
-          // 渐变过渡带
-          Column()
-            .width('100%').height(44)
-            .linearGradient({
-              direction: GradientDirection.Bottom,
-              colors: [['rgba(255,255,255,0)', 0.0], ['rgba(255,255,255,0.42)', 1.0]]
-            })
-        }
-        .width('100%').height('100%')
-      }
-
-      // 毛玻璃文字层
+    Stack() {
+      // ── 卡片主体 ──
       Column() {
-        if (this.card.imageUrl.length > 0) {
-          Blank().height('36%')
+        // ① 顶行：分类药丸 + 收藏按钮
+        Row() {
+          // 分类药丸：白色文字 + 彩色背景
+          Text(this.card.category || '冷知识')
+            .fontSize(11).fontWeight(600).fontColor('#FFFFFF')
+            .padding({ left: 12, right: 12, top: 4, bottom: 4 })
+            .borderRadius(20)
+            .backgroundColor(this.gradient.accentColor)
+
+          Blank()
+
+          // 收藏图标
+          Image($r('app.media.bookmark7'))
+            .width(20).height(20)
+            .onClick(() => { this.onFavorite?.() })
         }
+        .width('100%')
 
+        Row().height(16).width('100%')
+
+        // ② 标题 — 22px Bold
         Text(this.card.title)
-          .fontSize(20).fontWeight(700)
-          .fontColor('#2a2a38').lineHeight(28)
-          .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
-          .margin({ bottom: 12 })
-
-        Text(this.card.content)
-          .fontSize(14).fontWeight(400)
-          .fontColor('#585868').lineHeight(23)
-          .maxLines(this.card.imageUrl.length > 0 ? 8 : 10)
+          .fontSize(22).fontWeight(700).fontColor(this.gradient.titleColor)
+          .lineHeight(31).maxLines(2).width('100%')
           .textOverflow({ overflow: TextOverflow.Ellipsis })
 
-        Blank()
+        Row().height(12).width('100%')
 
-        if (this.card.category) {
+        // ③ 分割线 — 1px
+        Row().width('100%').height(1).borderRadius(1)
+          .backgroundColor(`rgba(${this.gradient.borderRgb},0.5)`)
+
+        Row().height(16).width('100%')
+
+        // ④ 正文 — 15px
+        Text(this.card.content)
+          .fontSize(15).fontWeight(400).fontColor(this.gradient.bodyColor)
+          .lineHeight(25.5).maxLines(8).width('100%').layoutWeight(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+
+        // ⑤ 操作行：点赞 + 分享（内联图文，无圆钮）
+        if (this.showActions) {
           Row() {
-            Text(`# ${this.card.category}`)
-              .fontSize(11).fontColor('#909098')
-              .padding({ left: 12, right: 12, top: 5, bottom: 5 })
-              .backgroundColor('rgba(0,0,0,0.03)').borderRadius(10)
+            // 点赞
+            Row() {
+              Image(this.card.isLiked ? $r('app.media.heart5') : $r('app.media.heart5'))
+                .width(18).height(18)
+                .fillColor(this.card.isLiked ? '#EF4444' : this.gradient.accentColor)
+              Text('2.4k')
+                .fontSize(13).fontWeight(500).fontColor(this.gradient.accentColor)
+                .margin({ left: 6 })
+            }.onClick(() => { this.onLike?.() })
+
+            Blank()
+
+            // 分享
+            Row() {
+              Image($r('app.media.share2'))
+                .width(18).height(18)
+              Text('分享')
+                .fontSize(13).fontWeight(500).fontColor(this.gradient.accentColor)
+                .margin({ left: 6 })
+            }.onClick(() => { this.onShare?.() })
           }
+          .width('100%')
         }
       }
       .width('100%').height('100%')
-      .padding({ left: 22, right: 22, top: 22, bottom: 22 })
-      .borderRadius(22)
-      .backgroundColor('rgba(255,255,255,0.45)')
-      .backdropBlur(22)
+      .padding({ left: 24, right: 24, top: 28, bottom: 24 })
+      .borderRadius(28)
+      .linearGradient({
+        angle: 165,
+        colors: [[this.gradient.gradientStart, 0.0], [this.gradient.gradientEnd, 0.5], [this.gradient.gradientStart + '88', 1.0]]
+      })
+      .border({ width: 1, color: this.gradient.borderColor })
+      .shadow({ radius: 32, color: 'rgba(0,0,0,0.13)', offsetY: 14 })
     }
     .width('100%').height('100%')
-    .borderRadius(22)
-    .shadow({ radius: 28, color: this.gradientStart + '28', offsetY: 8 })
   }
 }

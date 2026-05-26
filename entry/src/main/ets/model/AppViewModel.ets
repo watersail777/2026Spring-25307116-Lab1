@@ -5,6 +5,17 @@ import { LocationHelper } from '../utils/LocationHelper'
 import { FallbackData } from '../data/FallbackData'
 import pasteboard from '@ohos.pasteboard'
 
+export interface CardGradient {
+  gradientStart: string
+  gradientEnd: string
+  borderColor: string
+  borderRgb: string
+  accentColor: string
+  titleColor: string
+  bodyColor: string
+  name: string
+}
+
 @ObservedV2
 export class AppViewModel {
   @Trace currentTab: number = 0
@@ -21,6 +32,18 @@ export class AppViewModel {
   @Trace categoryStats: [string, number][] = []
 
   private dotColors: string[] = ['#c5e8d5', '#dcd0f0', '#f8d8d4', '#d0e4f4', '#f8f0d0', '#f0d8e4']
+
+  // ── 卡片渐变配色池（马卡龙暖调）──
+  static readonly CARD_GRADIENTS: CardGradient[] = [
+    { gradientStart: '#f0e6f4', gradientEnd: '#e0d2e8', borderColor: '#d8c8e0', borderRgb: '216,200,224', accentColor: '#C9A8D8', titleColor: '#2D1B3D', bodyColor: '#5B3D6E', name: '薰衣草暖紫' },
+    { gradientStart: '#f6f0e0', gradientEnd: '#ebe0c8', borderColor: '#ddd0b8', borderRgb: '221,208,184', accentColor: '#D4A843', titleColor: '#3D2A00', bodyColor: '#6B4A10', name: '暖金奶油' },
+    { gradientStart: '#e6f0e6', gradientEnd: '#d0e2d0', borderColor: '#c0d4c0', borderRgb: '192,212,192', accentColor: '#7DBE7D', titleColor: '#1A3320', bodyColor: '#3A6B3A', name: '鼠尾草绿' },
+    { gradientStart: '#f4e6e4', gradientEnd: '#e8d2d0', borderColor: '#dcc4c0', borderRgb: '220,196,192', accentColor: '#E08080', titleColor: '#3D1A18', bodyColor: '#8B4040', name: '蜜桃暖粉' },
+  ]
+
+  getCardGradient(index: number): CardGradient {
+    return AppViewModel.CARD_GRADIENTS[index % AppViewModel.CARD_GRADIENTS.length]
+  }
 
   // ── 初始化 ──
 

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知域 — 高保真原型</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  /* 浮雕阴影 — 加强版 */
+  .card-emboss {
+    box-shadow:
+      /* 左上强亮边 — 模拟光源 */
+      0 -6px 16px rgba(255,255,255,0.95),
+      -4px -4px 12px rgba(255,255,255,0.7),
+      /* 右下暗边 — 浮雕厚度 */
+      0 14px 32px rgba(160,150,130,0.18),
+      4px 6px 20px rgba(160,150,130,0.10),
+      /* 卡片边缘微凸 */
+      0 0 0 1px rgba(0,0,0,0.03);
+  }
+  .card-emboss-sm {
+    box-shadow:
+      0 -4px 10px rgba(255,255,255,0.9),
+      -2px -2px 6px rgba(255,255,255,0.6),
+      0 10px 24px rgba(160,150,130,0.15),
+      2px 3px 12px rgba(160,150,130,0.08);
+  }
+  .btn-emboss {
+    box-shadow:
+      0 -3px 6px rgba(255,255,255,0.9),
+      0 6px 14px rgba(160,150,130,0.14);
+  }
+  .btn-emboss:active {
+    box-shadow:
+      inset 0 3px 8px rgba(0,0,0,0.08),
+      inset 0 -1px 3px rgba(255,255,255,0.5);
+  }
+  /* 卡片顶部高光线 */
+  .card-highlight::before {
+    content: ''; position: absolute; top: 0; left: 14px; right: 14px; height: 1.5px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    border-radius: 2px; z-index: 2;
+  }
+  /* 按钮高光线 */
+  .btn-highlight::before {
+    content: ''; position: absolute; top: 2px; left: 10px; right: 10px; height: 1px;
+    background: rgba(255,255,255,0.5); border-radius: 1px;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+// ── Gemini 风格图标 ──
+
+const CompassIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "#1F2937" : "none"} stroke={active ? "#1F2937" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+  </svg>
+);
+
+const BookmarkNavIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "#1F2937" : "none"} stroke={active ? "#1F2937" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+  </svg>
+);
+
+const MapPinIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "#1F2937" : "none"} stroke={active ? "#1F2937" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+    <circle cx="12" cy="10" r="3"></circle>
+  </svg>
+);
+
+const UserIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "#1F2937" : "none"} stroke={active ? "#1F2937" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+    <circle cx="12" cy="7" r="4"></circle>
+  </svg>
+);
+
+const HeartIcon = ({ filled }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={filled ? "#EF4444" : "none"} stroke={filled ? "#EF4444" : "#4B5563"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+  </svg>
+);
+
+const BookmarkCardIcon = ({ filled }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={filled ? "#F59E0B" : "none"} stroke={filled ? "#F59E0B" : "#4B5563"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+  </svg>
+);
+
+const ShareIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4B5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="5" r="3"></circle>
+    <circle cx="6" cy="12" r="3"></circle>
+    <circle cx="18" cy="19" r="3"></circle>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+  </svg>
+);
+
+const ChevronLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+);
+
+const ChevronRight = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+);
+
+// ── 卡片配色：渐变（和我们第一版一致）──
+const cardGradients = [
+  { gradient: 'linear-gradient(165deg, #f0e6f4 0%, #e5d7ec 30%, #e0d2e8 60%, #ece0f0 100%)', border: '#d8c8e0', accent: '#8b6098', name: '薰衣草暖紫' },
+  { gradient: 'linear-gradient(165deg, #f6f0e0 0%, #efe6d2 30%, #ebe0c8 60%, #f4eedc 100%)', border: '#ddd0b8', accent: '#b09048', name: '暖金奶油' },
+  { gradient: 'linear-gradient(165deg, #e6f0e6 0%, #d8e8d8 30%, #d0e2d0 60%, #e2ece2 100%)', border: '#c0d4c0', accent: '#568858', name: '鼠尾草绿' },
+  { gradient: 'linear-gradient(165deg, #f4e6e4 0%, #eedad8 30%, #e8d2d0 60%, #f0e2e0 100%)', border: '#dcc4c0', accent: '#a86860', name: '蜜桃暖粉' },
+];
+
+const cards = [
+  {
+    cat: '生物奇观', emoji: '🐙',
+    title: '章鱼有三颗心脏，游泳时主心脏会停止跳动。',
+    body: '这意味着游泳对它们来说是一件极其耗费体力的事情。因此，在深海中，你会发现大多数章鱼更喜欢在海底慢慢爬行，而不是游泳。章鱼天生拥有三颗心脏：两颗鳃心为鳃部供血，一颗主心脏为全身供血。',
+    liked: false, faved: false
+  },
+  {
+    cat: '宇宙浪漫', emoji: '🪐',
+    title: '你身体里的铁和钙，全部来自远古超新星爆发。',
+    body: '大爆炸只产生了氢和氦。组成我们血液中的铁、骨骼里的钙，都是恒星在生命尽头极速坍缩爆炸时瞬间合成的。我们都是星辰的碎片——构成你身体的每一颗原子，都曾在某颗恒星内部燃烧过。',
+    liked: false, faved: false
+  },
+  {
+    cat: '物种档案', emoji: '🩸',
+    title: '鲎的血液是蓝色的，具有极高的医疗价值。',
+    body: '鲎血含血蓝蛋白，蛋白中含铜元素，与氧气结合后呈独特的蓝色。鲎血遇细菌内毒素会快速凝固，利用此特性制成的鲎试剂广泛用于医疗器械、药品的细菌污染检测。长期过度采血与栖息地破坏，导致中国鲎现已成为濒危保护物种。',
+    liked: false, faved: false
+  },
+  {
+    cat: '生理猎奇', emoji: '🐸',
+    title: '青蛙如果吃坏了肚子，会把整个胃翻出来清洗。',
+    body: '青蛙没有人类的呕吐反射机制，无法像普通动物一样直接呕吐。当误食有毒或无法消化的食物时，它会把整个胃部从口腔外翻出来，用前肢清理掉胃里杂物，再将胃部复位回体内——这个画面既魔幻又高效。',
+    liked: false, faved: false
+  },
+];
+
+// ── 组件 ──
+
+const StatusBar = () => (
+  <div className="flex justify-between items-center px-6 pt-3 pb-1 text-xs font-semibold text-gray-800 z-10 relative">
+    <span>09:41</span>
+    <div className="flex space-x-1.5 items-center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-gray-800"><path d="M2 22h20V2z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-gray-800"><path d="M12.01 21.49L23.64 7c-.45-.34-4.93-4-11.64-4C5.28 3 .81 6.66.36 7l11.63 14.49z"/></svg>
+      <svg width="24" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-800"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/><rect x="4" y="9" width="12" height="6" fill="currentColor" rx="1"/></svg>
+    </div>
+  </div>
+);
+
+const TopNav = ({ mode, onModeChange }) => (
+  <div className="flex justify-center space-x-6 pt-4 pb-2 relative z-10">
+    <button onClick={() => onModeChange('immersive')} className="flex flex-col items-center">
+      <span className={`text-sm transition-colors ${mode === 'immersive' ? 'text-gray-900 font-semibold' : 'text-gray-400'}`}>沉浸</span>
+      {mode === 'immersive' && <div className="w-1 h-1 bg-gray-800 rounded-full mt-1"></div>}
+    </button>
+    <button onClick={() => onModeChange('discover')} className="flex flex-col items-center">
+      <span className={`text-sm transition-colors ${mode === 'discover' ? 'text-gray-900 font-semibold' : 'text-gray-400'}`}>发现</span>
+      {mode === 'discover' && <div className="w-1 h-1 bg-gray-800 rounded-full mt-1"></div>}
+    </button>
+  </div>
+);
+
+const BottomNav = () => (
+  <div className="absolute bottom-0 w-full h-20 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around items-center px-4 pb-4 z-20"
+    style={{boxShadow:'inset 0 2px 6px rgba(0,0,0,0.03),inset 0 -1px 3px rgba(255,255,255,0.6),0 -1px 0 rgba(255,255,255,0.9)'}}>
+    <div className="flex flex-col items-center space-y-1">
+      <CompassIcon active={true} />
+      <span className="text-[10px] text-gray-900 font-medium">发现</span>
+    </div>
+    <div className="flex flex-col items-center space-y-1">
+      <BookmarkNavIcon active={false} />
+      <span className="text-[10px] text-gray-400">收藏</span>
+    </div>
+    <div className="flex flex-col items-center space-y-1">
+      <MapPinIcon active={false} />
+      <span className="text-[10px] text-gray-400">附近圈</span>
+    </div>
+    <div className="flex flex-col items-center space-y-1">
+      <UserIcon active={false} />
+      <span className="text-[10px] text-gray-400">我的</span>
+    </div>
+  </div>
+);
+
+// ── 沉浸模式卡片（紧凑版）──
+const ImmersiveCard = ({ card, grad, index, total, onLike, onFav, onShare }) => (
+  <div className="relative card-highlight card-emboss rounded-[28px] border flex flex-col z-10"
+    style={{ background: grad.gradient, borderColor: grad.border, minHeight: 0 }}>
+    {/* 分类标签 */}
+    <div className="px-6 pt-5 pb-1">
+      <span className="text-[11px] tracking-widest font-medium" style={{ color: grad.accent }}>
+        # {card.cat}
+      </span>
+    </div>
+    {/* 标题 */}
+    <h2 className="px-6 text-[19px] font-medium leading-[1.5] text-gray-800 mb-3">
+      {card.title}
+    </h2>
+    {/* 装饰分割线 */}
+    <div className="px-6 mb-4">
+      <div className="w-8 h-1 rounded-full" style={{ background: grad.border }}></div>
+    </div>
+    {/* 正文 */}
+    <p className="px-6 text-[13.5px] text-gray-500 leading-relaxed flex-1 mb-3">{card.body}</p>
+    {/* 操作栏 */}
+    <div className="mx-5 pt-4 pb-5 border-t flex justify-end gap-5" style={{ borderColor: grad.border + '80' }}>
+      <button onClick={onFav} className="p-1 -m-1 btn-highlight relative btn-emboss rounded-full w-9 h-9 flex items-center justify-center bg-white/40 border border-white/40 active:scale-90 transition-transform">
+        <BookmarkCardIcon filled={card.faved} />
+      </button>
+      <button onClick={onLike} className="p-1 -m-1 btn-highlight relative btn-emboss rounded-full w-9 h-9 flex items-center justify-center bg-white/40 border border-white/40 active:scale-90 transition-transform">
+        <HeartIcon filled={card.liked} />
+      </button>
+      <button onClick={onShare} className="p-1 -m-1 btn-highlight relative btn-emboss rounded-full w-9 h-9 flex items-center justify-center bg-white/40 border border-white/40 active:scale-90 transition-transform">
+        <ShareIcon />
+      </button>
+    </div>
+  </div>
+);
+
+// ── 发现模式网格卡片 ──
+const GridCard = ({ card, grad, onClick }) => (
+  <div onClick={onClick}
+    className="card-emboss-sm card-highlight rounded-2xl p-5 flex flex-col cursor-pointer transition-transform active:scale-95 relative border"
+    style={{ background: grad.gradient, borderColor: grad.border }}>
+    <div className="text-[10px] tracking-wider mb-2 font-medium" style={{ color: grad.accent }}># {card.cat}</div>
+    <h3 className="text-[14px] font-medium text-gray-800 leading-snug flex-1">{card.title}</h3>
+    <div className="text-right text-2xl opacity-25 select-none mt-2">{card.emoji}</div>
+  </div>
+);
+
+// ── 页面指示器 ──
+const Pager = ({ current, total }) => (
+  <div className="flex justify-center gap-2 py-4 z-10 relative">
+    {Array.from({length:total}, (_, i) => (
+      <div key={i} className={`rounded-full transition-all duration-300 ${
+        i === current ? 'w-6 bg-gray-400 h-1.5' : 'w-1.5 h-1.5 bg-gray-300'
+      }`}></div>
+    ))}
+  </div>
+);
+
+// ── 浮动翻页按钮 ──
+const FloatNav = ({ onPrev, onNext, onShare, current, total }) => (
+  <div className="flex justify-center items-center gap-4 pb-2 z-10 relative">
+    <button onClick={onPrev} disabled={current === 0}
+      className="btn-emboss w-11 h-11 rounded-full bg-white/80 backdrop-blur border border-white/60 flex items-center justify-center text-gray-500 disabled:opacity-25 transition-transform active:scale-90"><ChevronLeft /></button>
+    <button onClick={onShare}
+      className="btn-emboss w-11 h-11 rounded-full bg-white/80 backdrop-blur border border-white/60 flex items-center justify-center text-gray-500 transition-transform active:scale-90"><ShareIcon /></button>
+    <button onClick={onNext} disabled={current === total - 1}
+      className="btn-emboss w-11 h-11 rounded-full bg-white/80 backdrop-blur border border-white/60 flex items-center justify-center text-gray-500 disabled:opacity-25 transition-transform active:scale-90"><ChevronRight /></button>
+  </div>
+);
+
+// ── Toast ──
+const Toast = ({ msg }) => msg ? (
+  <div className="absolute bottom-28 left-0 right-0 flex justify-center z-30">
+    <div className="bg-gray-800/90 backdrop-blur text-white text-sm px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 animate-bounce">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A7F3D0" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <span>{msg}</span>
+    </div>
+  </div>
+) : null;
+
+// ── 手机框 ──
+const PhoneFrame = ({ children, bgClass }) => (
+  <div className={`relative w-[320px] h-[650px] ${bgClass} rounded-[40px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border-[8px] border-gray-900 flex flex-col overflow-hidden ring-1 ring-gray-200`}>
+    <div className="absolute top-0 w-full h-6 flex justify-center z-20">
+      <div className="w-32 h-6 bg-gray-900 rounded-b-3xl"></div>
+    </div>
+    {children}
+  </div>
+);
+
+// ── 主 App ──
+function App() {
+  const [mode, setMode] = useState('immersive');
+  const [idx, setIdx] = useState(0);
+  const [cardData, setCardData] = useState(cards);
+  const [toast, setToast] = useState('');
+
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 1800); };
+
+  const handleLike = () => {
+    const c = [...cardData];
+    if (c[idx].liked) { showToast('已经点过赞啦'); return; }
+    c[idx] = {...c[idx], liked: true};
+    setCardData(c); showToast('已点赞');
+  };
+
+  const handleFav = () => {
+    const c = [...cardData];
+    c[idx] = {...c[idx], faved: !c[idx].faved};
+    setCardData(c); showToast(c[idx].faved ? '已添加到收藏' : '已取消收藏');
+  };
+
+  const handleShare = () => showToast('已复制到剪贴板，去分享吧');
+
+  const currentCard = cardData[idx];
+  const grad = cardGradients[idx];
+
+  return (
+    <div className="min-h-screen bg-[#ECECF1] py-10 px-6 flex flex-col items-center font-sans">
+      <div className="max-w-[1400px] w-full">
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2 tracking-wide">知域</h1>
+          <p className="text-gray-500">冷知识卡片 · 马卡龙配色 + 浮雕阴影 · Gemini 风格图标</p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-8">
+          {/* 模拟器 1：沉浸模式 */}
+          <div className="flex flex-col items-center">
+            <PhoneFrame bgClass="bg-[#f5f4f0]">
+              <StatusBar />
+              <TopNav mode={mode} onModeChange={(m) => { setMode(m); if (m === 'immersive') setIdx(0); }} />
+              {mode === 'immersive' ? (
+                <>
+                  <div className="flex-1 flex flex-col justify-center px-4 pb-2 relative">
+                    <div className="absolute top-8 left-6 right-6 h-[340px] rounded-3xl opacity-30 -z-10 transform scale-95 translate-y-6"
+                      style={{ background: cardGradients[(idx+1) % 4].gradient }}></div>
+                    <ImmersiveCard card={currentCard} grad={grad} index={idx} total={cardData.length}
+                      onLike={handleLike} onFav={handleFav} onShare={handleShare} />
+                  </div>
+                  <Pager current={idx} total={cardData.length} />
+                  <FloatNav current={idx} total={cardData.length} onPrev={() => setIdx(i => i - 1)}
+                    onNext={() => setIdx(i => i + 1)} onShare={handleShare} />
+                </>
+              ) : (
+                <div className="flex-1 overflow-y-auto px-4 pt-2 pb-24 no-scrollbar">
+                  <div className="grid grid-cols-2 gap-3">
+                    {cardData.map((c, i) => (
+                      <div key={i} className={i === 1 || i === 2 ? 'h-56' : 'h-48'}>
+                        <div className={`h-full ${i === 3 ? '-mt-6' : ''}`}>
+                          <GridCard card={c} grad={cardGradients[i]} onClick={() => { setIdx(i); setMode('immersive'); }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <BottomNav />
+              <Toast msg={toast} />
+            </PhoneFrame>
+            <span className="mt-5 text-sm font-medium text-gray-600 bg-white px-4 py-1.5 rounded-full shadow-sm">可交互原型</span>
+            <p className="text-xs text-gray-400 mt-1">点击模式切换 · 操作按钮 · 网格卡片</p>
+          </div>
+
+          {/* 静态展示：4 张卡片配色一览 */}
+          {cardData.map((c, i) => (
+            <div key={i} className="flex flex-col items-center">
+              <PhoneFrame bgClass="bg-[#f5f4f0]">
+                <StatusBar />
+                <TopNav mode="immersive" onModeChange={() => {}} />
+                <div className="flex-1 flex flex-col justify-center px-4 pb-2 relative">
+                  <div className="absolute top-8 left-6 right-6 h-[380px] rounded-3xl opacity-30 -z-10 transform scale-95 translate-y-6"
+                    style={{ background: cardGradients[(i+1) % 4].gradient }}></div>
+                  <ImmersiveCard card={{...c, liked: i === 0, faved: i === 1}} grad={cardGradients[i]} index={i} total={4}
+                    onLike={() => {}} onFav={() => {}} onShare={() => {}} />
+                </div>
+                <Pager current={i} total={4} />
+                <BottomNav />
+              </PhoneFrame>
+              <span className="mt-5 text-sm font-medium text-gray-600 bg-white px-4 py-1.5 rounded-full shadow-sm">
+                卡片 {i+1}：{cardGradients[i].name}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
