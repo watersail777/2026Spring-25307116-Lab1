@@ -4,6 +4,12 @@ import { KnowledgeItem, UserProfile } from '../model/KnowledgeItem'
 const STORE_NAME = 'zhiyu_store'
 const INDEX_KEY = '__card_ids'
 const FAV_INDEX_KEY = '__fav_ids'
+const READ_HISTORY_KEY = '__read_history'
+
+export interface ReadHistoryEntry {
+  cardId: string
+  readAt: number
+}
 
 function parseJSON<T>(raw: string): T {
   return JSON.parse(raw) as T
@@ -132,5 +138,41 @@ export class LocalStore {
     const val: preferences.ValueType = LocalStore.store?.getSync('nearby_cards', '[]') ?? '[]'
     const str: string = typeof val === 'string' ? val : '[]'
     return parseJSON<KnowledgeItem[]>(str)
+  }
+
+  // ── 阅读历史 ──
+
+  static addReadHistory(cardId: string): void {
+    const list: ReadHistoryEntry[] = LocalStore.getReadHistoryInternal()
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (list[i].cardId === cardId) {
+        list.splice(i, 1)
+      }
+    }
+    list.push({ cardId: cardId, readAt: Date.now() })
+    LocalStore.store?.putSync(READ_HISTORY_KEY, JSON.stringify(list))
+    LocalStore.store?.flush()
+  }
+
+  static getReadHistory(): ReadHistoryEntry[] {
+    return LocalStore.getReadHistoryInternal()
+  }
+
+  static removeReadHistory(cardId: string): void {
+    const list: ReadHistoryEntry[] = LocalStore.getReadHistoryInternal()
+    const filtered: ReadHistoryEntry[] = []
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].cardId !== cardId) {
+        filtered.push(list[i])
+      }
+    }
+    LocalStore.store?.putSync(READ_HISTORY_KEY, JSON.stringify(filtered))
+    LocalStore.store?.flush()
+  }
+
+  private static getReadHistoryInternal(): ReadHistoryEntry[] {
+    const val: preferences.ValueType = LocalStore.store?.getSync(READ_HISTORY_KEY, '[]') ?? '[]'
+    const str: string = typeof val === 'string' ? val : '[]'
+    return parseJSON<ReadHistoryEntry[]>(str)
   }
 }

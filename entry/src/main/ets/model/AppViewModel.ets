@@ -1,5 +1,5 @@
 import { KnowledgeItem, UserProfile } from './KnowledgeItem'
-import { LocalStore } from '../data/LocalStore'
+import { LocalStore, ReadHistoryEntry } from '../data/LocalStore'
 import { NFCExchange } from '../utils/NFCExchange'
 import { LocationHelper } from '../utils/LocationHelper'
 import { FallbackData } from '../data/FallbackData'
@@ -29,16 +29,20 @@ export class AppViewModel {
   @Trace profile: UserProfile = new UserProfile()
   @Trace favCount: number = 0
   @Trace likeCount: number = 0
+  @Trace readCount: number = 0
   @Trace categoryStats: [string, number][] = []
+  @Trace readHistory: ReadHistoryEntry[] = []
 
   private dotColors: string[] = ['#c5e8d5', '#dcd0f0', '#f8d8d4', '#d0e4f4', '#f8f0d0', '#f0d8e4']
 
   // ── 卡片渐变配色池（马卡龙暖调）──
   static readonly CARD_GRADIENTS: CardGradient[] = [
-    { gradientStart: '#f0e6f4', gradientEnd: '#e0d2e8', borderColor: '#d8c8e0', borderRgb: '216,200,224', accentColor: '#C9A8D8', titleColor: '#2D1B3D', bodyColor: '#5B3D6E', name: '薰衣草暖紫' },
-    { gradientStart: '#f6f0e0', gradientEnd: '#ebe0c8', borderColor: '#ddd0b8', borderRgb: '221,208,184', accentColor: '#D4A843', titleColor: '#3D2A00', bodyColor: '#6B4A10', name: '暖金奶油' },
-    { gradientStart: '#e6f0e6', gradientEnd: '#d0e2d0', borderColor: '#c0d4c0', borderRgb: '192,212,192', accentColor: '#7DBE7D', titleColor: '#1A3320', bodyColor: '#3A6B3A', name: '鼠尾草绿' },
-    { gradientStart: '#f4e6e4', gradientEnd: '#e8d2d0', borderColor: '#dcc4c0', borderRgb: '220,196,192', accentColor: '#E08080', titleColor: '#3D1A18', bodyColor: '#8B4040', name: '蜜桃暖粉' },
+    { gradientStart: '#f0e6f4', gradientEnd: '#e0d2e8', borderColor: '#d8c8e0', borderRgb: '216,200,224', accentColor: '#C9A8D8', titleColor: '#2D1B3D', bodyColor: '#5B3D6E', name: '天文' },
+    { gradientStart: '#e6f0e6', gradientEnd: '#d0e2d0', borderColor: '#c0d4c0', borderRgb: '192,212,192', accentColor: '#7DBE7D', titleColor: '#1A3320', bodyColor: '#3A6B3A', name: '生物' },
+    { gradientStart: '#f6f0e0', gradientEnd: '#ebe0c8', borderColor: '#ddd0b8', borderRgb: '221,208,184', accentColor: '#D4A843', titleColor: '#3D2A00', bodyColor: '#6B4A10', name: '自然' },
+    { gradientStart: '#f4e6e4', gradientEnd: '#e8d2d0', borderColor: '#dcc4c0', borderRgb: '220,196,192', accentColor: '#E08080', titleColor: '#3D1A18', bodyColor: '#8B4040', name: '章鱼' },
+    { gradientStart: '#e8e0f8', gradientEnd: '#d8d0f0', borderColor: '#c8c0e0', borderRgb: '200,192,224', accentColor: '#8870C8', titleColor: '#1A1040', bodyColor: '#6040A0', name: '物理' },
+    { gradientStart: '#e0f4f0', gradientEnd: '#c8e8e0', borderColor: '#c0e0d8', borderRgb: '192,224,216', accentColor: '#4A9E90', titleColor: '#0A2820', bodyColor: '#2A6A60', name: '历史' },
   ]
 
   getCardGradient(index: number): CardGradient {
@@ -214,6 +218,22 @@ export class AppViewModel {
     return this.dotColors[idx % this.dotColors.length]
   }
 
+  // ── 阅读历史 ──
+
+  markAsRead(cardId: string): void {
+    LocalStore.addReadHistory(cardId)
+  }
+
+  loadReadHistory(): void {
+    this.readHistory = LocalStore.getReadHistory()
+    this.readCount = this.readHistory.length
+  }
+
+  deleteFromHistory(cardId: string): void {
+    LocalStore.removeReadHistory(cardId)
+    this.loadReadHistory()
+  }
+
   // ── Toast ──
 
   showToast(msg: string): void {
@@ -227,7 +247,8 @@ export class AppViewModel {
 
   getDotIndices(): number[] {
     const arr: number[] = []
-    for (let i = 0; i < Math.min(this.cards.length, 10); i++) {
+    const total = Math.min(this.cards.length, 10)
+    for (let i = 0; i < total; i++) {
       arr.push(i)
     }
     return arr
