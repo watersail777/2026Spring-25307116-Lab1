@@ -1,0 +1,36 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="100%" stop-color="#dcd0f0"/>
+    </linearGradient>
+    <linearGradient id="rays" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="128" cy="128" r="120" fill="url(#bg)"/>
+  <!-- Knowledge book / lightbulb -->
+  <g transform="translate(78,48)">
+    <!-- Book base -->
+    <path d="M10 120 L10 30 Q10 15 25 15 L50 15 L50 40 L25 40 Q15 40 15 30 L15 30 Q15 40 10 40 Z" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+    <!-- Right page -->
+    <path d="M50 15 L75 15 Q90 15 90 30 L90 120 L50 120 Z" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+    <!-- Center fold -->
+    <line x1="50" y1="15" x2="50" y2="120" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    <!-- Sparkle/light rays above -->
+    <g stroke="#fff" stroke-width="4" stroke-linecap="round">
+      <line x1="50" y1="-8" x2="50" y2="-24"/>
+      <line x1="20" y1="2" x2="8" y2="-8"/>
+      <line x1="80" y1="2" x2="92" y2="-8"/>
+      <line x1="8" y1="22" x2="-4" y2="18"/>
+      <line x1="92" y1="22" x2="104" y2="18"/>
+    </g>
+    <!-- Small stars -->
+    <circle cx="30" cy="-5" r="3" fill="#fff" opacity="0.7"/>
+    <circle cx="72" cy="-10" r="2" fill="#fff" opacity="0.5"/>
+  </g>
+  <!-- Brand text -->
+  <text x="128" y="210" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="32" font-weight="700" opacity="0.9">知域</text>
+</svg>

@@ -1,0 +1,12 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "知域 - 冷知识科普卡片" },
+    { "name": "EntryAbility_desc", "value": "知域主入口" },
+    { "name": "EntryAbility_label", "value": "知域" },
+    { "name": "perm_internet_reason", "value": "用于访问AI生成服务和网络数据" },
+    { "name": "perm_network_reason", "value": "用于检测网络连接状态" },
+    { "name": "perm_wifi_reason", "value": "用于附近设备发现功能" },
+    { "name": "perm_location_reason", "value": "用于获取位置信息以匹配附近圈内容" },
+    { "name": "perm_nfc_reason", "value": "用于碰一碰交换卡片功能" }
+  ]
+}

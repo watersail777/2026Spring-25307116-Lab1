@@ -1,0 +1,34 @@
+{
+  "forms": [
+    {
+      "name": "DailyCardWidget",
+      "description": "每日冷知识（精简版）",
+      "src": "./ets/widget/pages/DailyCardWidget.ets",
+      "uiSyntax": "arkts",
+      "window": { "designWidth": 720, "autoDesignWidth": true },
+      "colorMode": "auto",
+      "isDefault": true,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "08:00",
+      "updateDuration": 1,
+      "defaultDimension": "2*4",
+      "supportDimensions": ["2*2", "2*4"],
+      "formConfigAbility": "ability://EntryFormAbility"
+    },
+    {
+      "name": "DailyCardWidgetLarge",
+      "description": "每日冷知识（完整版）",
+      "src": "./ets/widget/pages/DailyCardWidgetLarge.ets",
+      "uiSyntax": "arkts",
+      "window": { "designWidth": 720, "autoDesignWidth": true },
+      "colorMode": "auto",
+      "isDefault": false,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "08:00",
+      "updateDuration": 1,
+      "defaultDimension": "4*4",
+      "supportDimensions": ["4*4"],
+      "formConfigAbility": "ability://EntryFormAbility"
+    }
+  ]
+}
