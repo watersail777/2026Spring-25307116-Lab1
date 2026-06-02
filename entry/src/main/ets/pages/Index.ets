@@ -1,5 +1,5 @@
 import { AppViewModel } from '../model/AppViewModel'
-import { BrowseTab } from './tabs/BrowseTab'
+import { StarMapTab } from './tabs/StarMapTab'
 import { FavoritesTab } from './tabs/FavoritesTab'
 import { ProfileTab } from './tabs/ProfileTab'
 import { BottomNavBar } from '../components/BottomNavBar'
@@ -34,7 +34,7 @@ struct Index {
       // ── 内容区 ──
       Column() {
         if (this.vm.currentTab === 0) {
-          BrowseTab({ vm: this.vm })          // 首页
+          StarMapTab({ vm: this.vm })          // 星图首页
         } else if (this.vm.currentTab === 1) {
           FavoritesTab({ vm: this.vm })       // 书签
         } else {
