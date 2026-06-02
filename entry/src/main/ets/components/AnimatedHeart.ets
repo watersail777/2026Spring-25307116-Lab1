@@ -9,14 +9,14 @@ interface ParticleData {
   targetY: number
   opacity: number
   color: string
-  size: number
+  particleSize: number
 }
 
 @ComponentV2
 export struct AnimatedHeart {
   @Require @Param isLiked: boolean
   @Require @Param accentColor: string
-  @Param size: number = 20
+  @Param iconSize: number = 20
   @Event onToggle?: () => void
   @Local heartScale: number = 1.0
   @Local particles: ParticleData[] = []
@@ -38,7 +38,7 @@ export struct AnimatedHeart {
         targetY: Math.cos(angle) * dist - 10,
         opacity: 1.0,
         color: this.PARTICLE_COLORS[i],
-        size: 2.5 + Math.random() * 3
+        particleSize: 2.5 + Math.random() * 3
       })
     }
     this.particles = arr
@@ -48,7 +48,7 @@ export struct AnimatedHeart {
   private playBurst(): void {
     this.generateParticles()
 
-    animateTo({ duration: 380, curve: Curve.EaseOut }, () => {
+    this.getUIContext().animateTo({ duration: 380, curve: Curve.EaseOut }, () => {
       for (let i = 0; i < this.particles.length; i++) {
         this.particles[i].x = this.particles[i].targetX
         this.particles[i].y = this.particles[i].targetY
@@ -64,7 +64,7 @@ export struct AnimatedHeart {
 
   private playScaleBounce(): void {
     this.heartScale = 1.35
-    animateTo({ duration: 350, curve: Curve.EaseOut }, () => {
+    this.getUIContext().animateTo({ duration: 350, curve: Curve.EaseOut }, () => {
       this.heartScale = 1.0
     })
   }
@@ -79,9 +79,8 @@ export struct AnimatedHeart {
 
   build() {
     Stack() {
-      // 心形 Path
       Path()
-        .width(this.size).height(this.size)
+        .width(this.iconSize).height(this.iconSize)
         .commands('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z')
         .fill(this.isLiked ? '#EF4444' : 'none')
         .stroke(this.isLiked ? 'none' : this.accentColor)
@@ -90,18 +89,17 @@ export struct AnimatedHeart {
         .strokeLineJoin(LineJoinStyle.Round)
         .scale({ x: this.heartScale, y: this.heartScale })
 
-      // 粒子爆发层
       if (this.bursting) {
         ForEach(this.particles, (p: ParticleData, idx: number) => {
-          Circle({ width: p.size, height: p.size })
+          Circle({ width: p.particleSize, height: p.particleSize })
             .fill(p.color)
             .opacity(p.opacity)
             .translate({ x: p.x, y: p.y })
-            .position({ x: this.size / 2, y: this.size / 2 })
+            .position({ x: this.iconSize / 2, y: this.iconSize / 2 })
         }, (p: ParticleData, idx: number) => idx.toString())
       }
     }
-    .width(this.size + 8).height(this.size + 8)
+    .width(this.iconSize + 8).height(this.iconSize + 8)
     .alignContent(Alignment.Center)
     .onClick(() => { this.handleClick() })
   }
