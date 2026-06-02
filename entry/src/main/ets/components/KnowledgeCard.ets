@@ -1,5 +1,7 @@
 import { KnowledgeItem } from '../model/KnowledgeItem'
 import { CardGradient } from '../model/AppViewModel'
+import { AnimatedHeart } from './AnimatedHeart'
+import { AnimatedBookmark } from './AnimatedBookmark'
 
 // ═══════════════════════════════════════
 // 知识卡片 — 1:1 复刻 arkui-2 Frame_2_1116
@@ -13,6 +15,14 @@ export struct KnowledgeCard {
   @Event onFavorite?: () => void
   @Event onLike?: () => void
   @Event onShare?: () => void
+
+  private formatCount(n: number): string {
+    if (n >= 1000) {
+      const k = n / 1000
+      return k >= 10 ? Math.floor(k).toString() + 'k' : k.toFixed(1) + 'k'
+    }
+    return n.toString()
+  }
 
   build() {
     Stack() {
@@ -30,9 +40,12 @@ export struct KnowledgeCard {
           Blank()
 
           // 收藏图标
-          Image($r('app.media.bookmark7'))
-            .width(20).height(20)
-            .onClick(() => { this.onFavorite?.() })
+          AnimatedBookmark({
+            isFavorited: this.card.isFavorited,
+            accentColor: this.gradient.accentColor,
+            size: 20,
+            onToggle: () => { this.onFavorite?.() }
+          })
         }
         .width('100%')
 
@@ -63,13 +76,16 @@ export struct KnowledgeCard {
           Row() {
             // 点赞
             Row() {
-              Image(this.card.isLiked ? $r('app.media.heart5') : $r('app.media.heart5'))
-                .width(18).height(18)
-                .fillColor(this.card.isLiked ? '#EF4444' : this.gradient.accentColor)
-              Text('2.4k')
+              AnimatedHeart({
+                isLiked: this.card.isLiked,
+                accentColor: this.gradient.accentColor,
+                size: 20,
+                onToggle: () => { this.onLike?.() }
+              })
+              Text(this.card.likeCount > 0 ? this.formatCount(this.card.likeCount) : '点赞')
                 .fontSize(13).fontWeight(500).fontColor(this.gradient.accentColor)
                 .margin({ left: 6 })
-            }.onClick(() => { this.onLike?.() })
+            }
 
             Blank()
 

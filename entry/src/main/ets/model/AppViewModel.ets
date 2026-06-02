@@ -128,14 +128,15 @@ export class AppViewModel {
       return
     }
     const card = this.cards[this.cardIndex]
-    if (card.isLiked) {
-      this.showToast('已点过赞')
-      return
+    const liked = LocalStore.toggleLike(card.id)
+    card.isLiked = liked
+    if (liked) {
+      card.likeCount++
+      this.showToast('已点赞')
+    } else {
+      card.likeCount = Math.max(0, card.likeCount - 1)
+      this.showToast('已取消')
     }
-    LocalStore.toggleLike(card.id)
-    card.isLiked = true
-    card.likeCount++
-    this.showToast('已点赞')
   }
 
   // ── 分享 ──

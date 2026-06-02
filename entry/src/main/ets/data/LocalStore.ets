@@ -103,7 +103,11 @@ export class LocalStore {
   static toggleLike(cardId: string): boolean {
     const key: string = `like_${cardId}`
     const val: preferences.ValueType = LocalStore.store?.getSync(key, false) ?? false
-    if (typeof val === 'boolean' && val) return true
+    if (typeof val === 'boolean' && val) {
+      LocalStore.store?.putSync(key, false)
+      LocalStore.store?.flush()
+      return false
+    }
     LocalStore.store?.putSync(key, true)
     LocalStore.store?.flush()
     return true
