@@ -6,7 +6,7 @@
 export struct AnimatedBookmark {
   @Require @Param isFavorited: boolean
   @Require @Param accentColor: string
-  @Param iconSize: number = 24
+  @Param iconSize: number = 32
   @Event onToggle?: () => void
   @Local iconScale: number = 1.0
 

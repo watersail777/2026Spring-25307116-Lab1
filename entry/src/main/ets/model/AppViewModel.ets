@@ -56,7 +56,7 @@ export class AppViewModel {
     if (saved.length >= 3) {
       this.cards = saved
     } else {
-      const all = FallbackData.getAll(18)
+      const all = FallbackData.getAll(31)
       for (const c of all) {
         LocalStore.saveCard(c)
       }

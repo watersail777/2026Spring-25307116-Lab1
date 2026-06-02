@@ -6,10 +6,9 @@
 export struct AnimatedHeart {
   @Require @Param isLiked: boolean
   @Require @Param accentColor: string
-  @Param iconSize: number = 24
+  @Param iconSize: number = 32
   @Event onToggle?: () => void
   @Local heartScale: number = 1.0
-  // 6 个固定粒子的偏移和透明度
   @Local p0x: number = 0; @Local p0y: number = 0; @Local p0o: number = 0
   @Local p1x: number = 0; @Local p1y: number = 0; @Local p1o: number = 0
   @Local p2x: number = 0; @Local p2y: number = 0; @Local p2o: number = 0
@@ -21,34 +20,35 @@ export struct AnimatedHeart {
 
   private playBurst(): void {
     const angles: number[] = [-0.9, -0.55, -0.2, 0.15, 0.5, 0.85, -1.2, 1.1]
-    const dists: number[] = [24, 20, 26, 18, 28, 22, 19, 25]
-    const offsets: number = this.iconSize / 2
+    const dists: number[] = [32, 27, 35, 24, 38, 30, 26, 34]
+    const cx: number = this.iconSize / 2
 
     // 镜头 1：粒子置中，可见
-    this.p0x = offsets; this.p0y = offsets; this.p0o = 1
-    this.p1x = offsets; this.p1y = offsets; this.p1o = 1
-    this.p2x = offsets; this.p2y = offsets; this.p2o = 1
-    this.p3x = offsets; this.p3y = offsets; this.p3o = 1
-    this.p4x = offsets; this.p4y = offsets; this.p4o = 1
-    this.p5x = offsets; this.p5y = offsets; this.p5o = 1
-    this.p6x = offsets; this.p6y = offsets; this.p6o = 1
-    this.p7x = offsets; this.p7y = offsets; this.p7o = 1
+    this.p0x = cx; this.p0y = cx; this.p0o = 1
+    this.p1x = cx; this.p1y = cx; this.p1o = 1
+    this.p2x = cx; this.p2y = cx; this.p2o = 1
+    this.p3x = cx; this.p3y = cx; this.p3o = 1
+    this.p4x = cx; this.p4y = cx; this.p4o = 1
+    this.p5x = cx; this.p5y = cx; this.p5o = 1
+    this.p6x = cx; this.p6y = cx; this.p6o = 1
+    this.p7x = cx; this.p7y = cx; this.p7o = 1
 
-    // 镜头 2：飞出
-    this.getUIContext().animateTo({ duration: 400, curve: Curve.EaseOut }, () => {
-      this.p0x = offsets + Math.sin(angles[0]) * dists[0]; this.p0y = offsets + Math.cos(angles[0]) * dists[0] - 10; this.p0o = 0
-      this.p1x = offsets + Math.sin(angles[1]) * dists[1]; this.p1y = offsets + Math.cos(angles[1]) * dists[1] - 10; this.p1o = 0
-      this.p2x = offsets + Math.sin(angles[2]) * dists[2]; this.p2y = offsets + Math.cos(angles[2]) * dists[2] - 10; this.p2o = 0
-      this.p3x = offsets + Math.sin(angles[3]) * dists[3]; this.p3y = offsets + Math.cos(angles[3]) * dists[3] - 10; this.p3o = 0
-      this.p4x = offsets + Math.sin(angles[4]) * dists[4]; this.p4y = offsets + Math.cos(angles[4]) * dists[4] - 10; this.p4o = 0
-      this.p5x = offsets + Math.sin(angles[5]) * dists[5]; this.p5y = offsets + Math.cos(angles[5]) * dists[5] - 10; this.p5o = 0
-      this.p6x = offsets + Math.sin(angles[6]) * dists[6]; this.p6y = offsets + Math.cos(angles[6]) * dists[6] - 10; this.p6o = 0
-      this.p7x = offsets + Math.sin(angles[7]) * dists[7]; this.p7y = offsets + Math.cos(angles[7]) * dists[7] - 10; this.p7o = 0
-    })
+    // 镜头 2：拆帧，确保 animateTo 捕获 opacity=1 起始态
+    setTimeout(() => {
+      this.getUIContext().animateTo({ duration: 400, curve: Curve.EaseOut }, () => {
+        this.p0x = cx + Math.sin(angles[0]) * dists[0]; this.p0y = cx + Math.cos(angles[0]) * dists[0] - 14; this.p0o = 0
+        this.p1x = cx + Math.sin(angles[1]) * dists[1]; this.p1y = cx + Math.cos(angles[1]) * dists[1] - 14; this.p1o = 0
+        this.p2x = cx + Math.sin(angles[2]) * dists[2]; this.p2y = cx + Math.cos(angles[2]) * dists[2] - 14; this.p2o = 0
+        this.p3x = cx + Math.sin(angles[3]) * dists[3]; this.p3y = cx + Math.cos(angles[3]) * dists[3] - 14; this.p3o = 0
+        this.p4x = cx + Math.sin(angles[4]) * dists[4]; this.p4y = cx + Math.cos(angles[4]) * dists[4] - 14; this.p4o = 0
+        this.p5x = cx + Math.sin(angles[5]) * dists[5]; this.p5y = cx + Math.cos(angles[5]) * dists[5] - 14; this.p5o = 0
+        this.p6x = cx + Math.sin(angles[6]) * dists[6]; this.p6y = cx + Math.cos(angles[6]) * dists[6] - 14; this.p6o = 0
+        this.p7x = cx + Math.sin(angles[7]) * dists[7]; this.p7y = cx + Math.cos(angles[7]) * dists[7] - 14; this.p7o = 0
+      })
+    }, 16)
   }
 
   private handleClick(): void {
-    // 两段弹跳
     this.getUIContext().animateTo({ duration: 140, curve: Curve.EaseOut }, () => {
       this.heartScale = 1.35
     })
@@ -76,7 +76,6 @@ export struct AnimatedHeart {
         .strokeLineJoin(LineJoinStyle.Round)
         .scale({ x: this.heartScale, y: this.heartScale })
 
-      // 粒子层
       Circle({ width: 3, height: 3 }).fill('#EF4444').opacity(this.p0o).position({ x: this.p0x, y: this.p0y })
       Circle({ width: 2.5, height: 2.5 }).fill('#F87171').opacity(this.p1o).position({ x: this.p1x, y: this.p1y })
       Circle({ width: 3.5, height: 3.5 }).fill('#FB923C').opacity(this.p2o).position({ x: this.p2x, y: this.p2y })
