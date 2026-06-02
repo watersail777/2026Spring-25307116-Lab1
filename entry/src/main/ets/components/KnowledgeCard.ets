@@ -1,7 +1,5 @@
 import { KnowledgeItem } from '../model/KnowledgeItem'
 import { CardGradient } from '../model/AppViewModel'
-import { AnimatedHeart } from './AnimatedHeart'
-import { AnimatedBookmark } from './AnimatedBookmark'
 
 // ═══════════════════════════════════════
 // 知识卡片 — 1:1 复刻 arkui-2 Frame_2_1116
@@ -36,12 +34,10 @@ export struct KnowledgeCard {
 
         Blank()
 
-        AnimatedBookmark({
-          isFavorited: this.card.isFavorited,
-          accentColor: this.gradient.accentColor,
-          iconSize: 32,
-          onToggle: () => { this.onFavorite?.() }
-        })
+        Image(this.card.isFavorited ? $r('app.media.bookmark7') : $r('app.media.bookmark7'))
+          .width(22).height(22)
+          .fillColor(this.card.isFavorited ? this.gradient.accentColor : this.gradient.accentColor)
+          .onClick(() => { this.onFavorite?.() })
       }
       .width('100%')
 
@@ -71,16 +67,13 @@ export struct KnowledgeCard {
       if (this.showActions) {
         Row() {
           Row() {
-            AnimatedHeart({
-              isLiked: this.card.isLiked,
-              accentColor: this.gradient.accentColor,
-              iconSize: 32,
-              onToggle: () => { this.onLike?.() }
-            })
+            Image(this.card.isLiked ? $r('app.media.heart5') : $r('app.media.heart5'))
+              .width(20).height(20)
+              .fillColor(this.card.isLiked ? '#EF4444' : this.gradient.accentColor)
             Text(this.card.likeCount > 0 ? this.formatCount(this.card.likeCount) : '点赞')
               .fontSize(13).fontWeight(500).fontColor(this.gradient.accentColor)
               .margin({ left: 6 })
-          }
+          }.onClick(() => { this.onLike?.() })
 
           Blank()
 
