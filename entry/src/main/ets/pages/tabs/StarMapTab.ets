@@ -58,7 +58,7 @@ function scatterPositions(vm: AppViewModel): [number, number][] {
 @ComponentV2
 export struct StarMapTab {
   @Require @Param vm: AppViewModel
-  @Local scale: number = 0.55
+  @Local zoomScale: number = 0.55
   @Local offsetX: number = -80
   @Local offsetY: number = -120
   @Local currentIdx: number = 0
@@ -66,7 +66,7 @@ export struct StarMapTab {
   @Local showDetail: boolean = false
   @Local starPositions: [number, number][] = []
 
-  private startScale: number = 0.55
+  private startZoomScale: number = 0.55
   private lastPanX: number = 0
   private lastPanY: number = 0
 
@@ -145,7 +145,7 @@ export struct StarMapTab {
           }, (card: KnowledgeItem, idx: number) => idx.toString())
         }
         .width(1200).height(1200)
-        .scale({ x: this.scale, y: this.scale })
+        .scale({ x: this.zoomScale, y: this.zoomScale })
         .translate({ x: this.offsetX, y: this.offsetY })
 
         // 详情覆盖层
@@ -196,11 +196,11 @@ export struct StarMapTab {
             }),
           PinchGesture({ fingers: 2 })
             .onActionStart(() => {
-              this.startScale = this.scale
+              this.startZoomScale = this.zoomScale
             })
             .onActionUpdate((event: GestureEvent) => {
-              const s = this.startScale * event.scale
-              this.scale = Math.max(0.25, Math.min(2.5, s))
+              const s = this.startZoomScale * event.scale
+              this.zoomScale = Math.max(0.25, Math.min(2.5, s))
             })
         )
       )
