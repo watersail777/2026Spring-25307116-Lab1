@@ -43,7 +43,7 @@ export struct KnowledgeCard {
           AnimatedBookmark({
             isFavorited: this.card.isFavorited,
             accentColor: this.gradient.accentColor,
-            iconSize: 20,
+            iconSize: 22,
             onToggle: () => { this.onFavorite?.() }
           })
         }
@@ -79,7 +79,7 @@ export struct KnowledgeCard {
               AnimatedHeart({
                 isLiked: this.card.isLiked,
                 accentColor: this.gradient.accentColor,
-                iconSize: 20,
+                iconSize: 22,
                 onToggle: () => { this.onLike?.() }
               })
               Text(this.card.likeCount > 0 ? this.formatCount(this.card.likeCount) : '点赞')
