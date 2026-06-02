@@ -6,7 +6,7 @@
 export struct AnimatedHeart {
   @Require @Param isLiked: boolean
   @Require @Param accentColor: string
-  @Param iconSize: number = 22
+  @Param iconSize: number = 24
   @Event onToggle?: () => void
   @Local heartScale: number = 1.0
   // 6 个固定粒子的偏移和透明度
@@ -86,7 +86,7 @@ export struct AnimatedHeart {
       Circle({ width: 3.5, height: 3.5 }).fill('#FF6B6B').opacity(this.p6o).position({ x: this.p6x, y: this.p6y })
       Circle({ width: 2, height: 2 }).fill('#FF8C8C').opacity(this.p7o).position({ x: this.p7x, y: this.p7y })
     }
-    .width(this.iconSize + 12).height(this.iconSize + 12)
+    .width(this.iconSize).height(this.iconSize)
     .alignContent(Alignment.Center)
     .onClick(() => { this.handleClick() })
   }

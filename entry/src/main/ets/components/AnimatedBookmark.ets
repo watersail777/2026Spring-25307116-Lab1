@@ -6,7 +6,7 @@
 export struct AnimatedBookmark {
   @Require @Param isFavorited: boolean
   @Require @Param accentColor: string
-  @Param iconSize: number = 22
+  @Param iconSize: number = 24
   @Event onToggle?: () => void
   @Local iconScale: number = 1.0
 
@@ -25,7 +25,7 @@ export struct AnimatedBookmark {
   build() {
     Path()
       .width(this.iconSize).height(this.iconSize)
-      .commands('M5 2h14a1 1 0 011 1v18l-7-5-7 5V3a1 1 0 011-1z')
+      .commands('M3 2h18a1 1 0 011 1v18l-9-5-9 5V3a1 1 0 011-1z')
       .fill(this.isFavorited ? this.accentColor : 'none')
       .stroke(this.isFavorited ? 'none' : this.accentColor)
       .strokeWidth(2.0)

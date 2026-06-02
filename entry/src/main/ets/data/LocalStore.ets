@@ -59,7 +59,8 @@ export class LocalStore {
   static getCard(id: string): KnowledgeItem | null {
     const val: preferences.ValueType = LocalStore.store?.getSync(`card_${id}`, '') ?? ''
     const str: string = typeof val === 'string' ? val : ''
-    return str.length > 0 ? parseJSON<KnowledgeItem>(str) : null
+    if (str.length === 0) return null
+    return KnowledgeItem.fromPlain(parseJSON<Record<string, Object>>(str))
   }
 
   static getAllCards(): KnowledgeItem[] {
