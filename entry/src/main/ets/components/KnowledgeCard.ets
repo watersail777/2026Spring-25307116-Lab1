@@ -34,9 +34,9 @@ export struct KnowledgeCard {
 
         Blank()
 
-        Image(this.card.isFavorited ? $r('app.media.bookmark7') : $r('app.media.bookmark7'))
+        Image(this.card.isFavorited ? $r('app.media.bookmark7_filled') : $r('app.media.bookmark7'))
           .width(22).height(22)
-          .fillColor(this.card.isFavorited ? this.gradient.accentColor : this.gradient.accentColor)
+          .fillColor(this.card.isFavorited ? '#EF4444' : this.gradient.accentColor)
           .onClick(() => { this.onFavorite?.() })
       }
       .width('100%')
@@ -67,7 +67,7 @@ export struct KnowledgeCard {
       if (this.showActions) {
         Row() {
           Row() {
-            Image(this.card.isLiked ? $r('app.media.heart5') : $r('app.media.heart5'))
+            Image(this.card.isLiked ? $r('app.media.heart5_filled') : $r('app.media.heart5'))
               .width(20).height(20)
               .fillColor(this.card.isLiked ? '#EF4444' : this.gradient.accentColor)
             Text(this.card.likeCount > 0 ? this.formatCount(this.card.likeCount) : '点赞')

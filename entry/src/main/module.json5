@@ -6,17 +6,19 @@
     "mainElement": "EntryAbility",
     "deviceTypes": ["phone", "tablet", "2in1"],
     "deliveryWithInstall": true,
-    "installationFree": false,
+    "installationFree": true,
+    "atomicService": { "preloads": [] },
     "pages": "$profile:main_pages",
     "abilities": [{
       "name": "EntryAbility",
       "srcEntry": "./ets/entryability/EntryAbility.ets",
       "description": "$string:EntryAbility_desc",
-      "icon": "$media:layered_image",
+      "icon": "$media:app_icon",
       "label": "$string:EntryAbility_label",
       "startWindowIcon": "$media:startIcon",
       "startWindowBackground": "$color:start_window_background",
       "exported": true,
+      "continuable": true,
       "skills": [
         {
           "entities": ["entity.system.home"],
@@ -26,6 +28,23 @@
           "actions": ["ohos.want.action.viewData"],
           "entities": ["entity.system.default"],
           "uris": [{ "scheme": "zhiyu", "host": "com.zhiyu.coldknowledge" }]
+        }
+      ]
+    },
+    {
+      "name": "InstantAbility",
+      "srcEntry": "./ets/instantability/InstantAbility.ets",
+      "description": "$string:EntryAbility_desc",
+      "icon": "$media:app_icon",
+      "label": "$string:EntryAbility_label",
+      "startWindowIcon": "$media:startIcon",
+      "startWindowBackground": "$color:start_window_background",
+      "exported": true,
+      "continuable": false,
+      "skills": [
+        {
+          "entities": ["entity.system.home"],
+          "actions": ["ohos.want.action.home"]
         }
       ]
     }],

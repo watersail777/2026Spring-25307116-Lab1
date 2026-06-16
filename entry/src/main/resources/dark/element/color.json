@@ -1,8 +1,14 @@
 {
   "color": [
-    {
-      "name": "start_window_background",
-      "value": "#000000"
-    }
+    { "name": "start_window_background", "value": "#121218" },
+    { "name": "page_bg", "value": "#121218" },
+    { "name": "surface_bg", "value": "#1e1e2a" },
+    { "name": "text_primary", "value": "#e5e5e5" },
+    { "name": "text_secondary", "value": "#9ca0aa" },
+    { "name": "text_tertiary", "value": "#6b6f78" },
+    { "name": "stats_bg", "value": "#1e1e2a" },
+    { "name": "stats_border", "value": "#2a2a38" },
+    { "name": "stats_text", "value": "#d5cfc6" },
+    { "name": "stats_label", "value": "#8a8480" }
   ]
 }

@@ -1,10 +1,12 @@
 import { KnowledgeItem } from '../../model/KnowledgeItem'
 import { AppViewModel, CardGradient } from '../../model/AppViewModel'
 import { KnowledgeCard } from '../../components/KnowledgeCard'
+import { DotIndicator } from '../../components/DotIndicator'
 
 @ComponentV2
 export struct BrowseTab {
   @Require @Param vm: AppViewModel
+  @Param isTablet: boolean = false
 
   @Local mode: string = 'immersive'    // immersive | discover
   @Local inDetail: boolean = false
@@ -26,17 +28,17 @@ export struct BrowseTab {
         Row() {
           Column() {
             Text('沉浸').fontSize(15).fontWeight(700)
-              .fontColor(this.mode === 'immersive' ? '#1F2937' : '#9CA3AF')
+              .fontColor(this.mode === 'immersive' ? $r('app.color.text_primary') : $r('app.color.text_tertiary'))
             if (this.mode === 'immersive') {
-              Row().width(20).height(3).borderRadius(2).backgroundColor('#1F2937').margin({ top: 4 })
+              Row().width(20).height(3).borderRadius(2).backgroundColor($r('app.color.text_primary')).margin({ top: 4 })
             }
           }.onClick(() => { this.mode = 'immersive' })
           Blank().width(32)
           Column() {
             Text('发现').fontSize(15).fontWeight(500)
-              .fontColor(this.mode === 'discover' ? '#1F2937' : '#9CA3AF')
+              .fontColor(this.mode === 'discover' ? $r('app.color.text_primary') : $r('app.color.text_tertiary'))
             if (this.mode === 'discover') {
-              Row().width(20).height(3).borderRadius(2).backgroundColor('#1F2937').margin({ top: 4 })
+              Row().width(20).height(3).borderRadius(2).backgroundColor($r('app.color.text_primary')).margin({ top: 4 })
             }
           }.onClick(() => { this.mode = 'discover' })
         }
@@ -86,15 +88,29 @@ export struct BrowseTab {
             .width('88%')
         } else {
           Column() {
-            Text('暂无卡片').fontSize(15).fontColor('#9CA3AF')
-            Text('左右滑动发现更多').fontSize(12).fontColor('#D1D5DB').margin({ top: 4 })
+            Text('暂无卡片').fontSize(15).fontColor($r('app.color.text_tertiary'))
+            Text('左右滑动发现更多').fontSize(12).fontColor($r('app.color.text_tertiary')).margin({ top: 4 })
           }
           .width('88%').height(200).justifyContent(FlexAlign.Center).borderRadius(28)
           .backgroundColor('rgba(255,255,255,0.4)')
         }
 
+        // 轮播导航点
+        DotIndicator({
+          totalCount: this.vm.cards.length,
+          currentIndex: this.vm.cardIndex,
+          activeColor: this.currentGradient.accentColor,
+          inactiveColor: this.currentGradient.borderColor,
+          onDotClick: (idx: number) => {
+            this.vm.cardIndex = idx
+            this.currentGradient = this.vm.getCardGradient(idx)
+            this.vm.markAsRead(this.vm.cards[idx].id)
+            this.vm.tryGenerate()
+          }
+        })
+
         // 底部留出导航空间
-        Row().height(80).width('100%')
+        Row().height(48).width('100%')
       }
       .width('100%')
       .alignItems(HorizontalAlign.Center)
@@ -105,24 +121,43 @@ export struct BrowseTab {
     this.buildFloatNav()
   }
 
-  // ── 发现模式（单列层叠）──
+  // ── 发现模式（手机层叠 / 平板多列网格）──
   @Builder buildDiscover() {
-    Scroll() {
-      Stack({ alignContent: Alignment.TopStart }) {
-        ForEach(this.vm.cards, (card: KnowledgeItem, idx: number) => {
-          Row() {
-            this.GridCard(card, this.vm.getCardGradient(idx))
-          }
-          .width('90%')
-          .position({ x: '5%', y: idx * 120 })
-          .zIndex(idx + 1)
-          .onClick(() => { this.enterDetail(idx) })
-        })
+    if (this.isTablet) {
+      // 平板：2-3 列网格
+      Scroll() {
+        Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start }) {
+          ForEach(this.vm.cards, (card: KnowledgeItem, idx: number) => {
+            Column() {
+              this.GridCard(card, this.vm.getCardGradient(idx))
+            }
+            .width('31%')
+            .margin({ left: '1.1%', right: '1.1%', bottom: 14 })
+            .onClick(() => { this.enterDetail(idx) })
+          })
+        }
+        .width('100%').padding({ left: 12, right: 12, top: 8 })
       }
-      .width('100%')
-      .height(this.vm.cards.length * 120 + 80)
+      .width('100%').layoutWeight(1).align(Alignment.Top)
+    } else {
+      // 手机：单列层叠
+      Scroll() {
+        Stack({ alignContent: Alignment.TopStart }) {
+          ForEach(this.vm.cards, (card: KnowledgeItem, idx: number) => {
+            Row() {
+              this.GridCard(card, this.vm.getCardGradient(idx))
+            }
+            .width('90%')
+            .position({ x: '5%', y: idx * 120 })
+            .zIndex(idx + 1)
+            .onClick(() => { this.enterDetail(idx) })
+          })
+        }
+        .width('100%')
+        .height(this.vm.cards.length * 120 + 80)
+      }
+      .width('100%').layoutWeight(1).align(Alignment.Top)
     }
-    .width('100%').layoutWeight(1).align(Alignment.Top)
   }
 
   // ── 详情页覆盖层 ──
@@ -132,15 +167,15 @@ export struct BrowseTab {
         Button() {
           Row() {
             Path().width(18).height(18).commands('M15 18l-6-6 6-6')
-              .fill('none').stroke('#1F2937').strokeWidth(2)
+              .fill('none').stroke($r('app.color.text_primary')).strokeWidth(2)
               .strokeLineCap(LineCapStyle.Round).strokeLineJoin(LineJoinStyle.Round)
-            Text('返回').fontSize(15).fontWeight(500).fontColor('#1F2937').margin({ left: 4 })
+            Text('返回').fontSize(15).fontWeight(500).fontColor($r('app.color.text_primary')).margin({ left: 4 })
           }
         }
         .backgroundColor(Color.Transparent).onClick(() => { this.exitDetail() })
         Blank()
         Text(`${this.detailIdx + 1} / ${this.vm.cards.length}`)
-          .fontSize(12).fontColor('#9CA3AF')
+          .fontSize(12).fontColor($r('app.color.text_tertiary'))
       }
       .width('100%').padding({ left: 16, right: 16, top: 8, bottom: 4 })
 
@@ -156,6 +191,18 @@ export struct BrowseTab {
             onShare: () => { this.vm.shareToSystem() }
           })
             .width('88%')
+
+          DotIndicator({
+            totalCount: this.vm.cards.length,
+            currentIndex: this.detailIdx,
+            activeColor: this.currentGradient.accentColor,
+            inactiveColor: this.currentGradient.borderColor,
+            onDotClick: (idx: number) => {
+              this.detailIdx = idx
+              this.currentGradient = this.vm.getCardGradient(idx)
+              this.vm.markAsRead(this.vm.cards[idx].id)
+            }
+          })
           Row().height(80).width('100%')
         }
         .width('100%')
@@ -166,7 +213,7 @@ export struct BrowseTab {
 
       this.buildFloatNavForDetail()
     }
-    .width('100%').height('100%').backgroundColor('#f5f4f0')
+    .width('100%').height('100%').backgroundColor($r('app.color.page_bg'))
   }
 
   // ── 浮动导航（沉浸模式）──
@@ -177,11 +224,11 @@ export struct BrowseTab {
         .border({ width: 1, color: 'rgba(255,255,255,0.6)' })
         .shadow({ radius: 12, color: 'rgba(0,0,0,0.1)', offsetY: 4 })
         .enabled(this.vm.cardIndex > 0).opacity(this.vm.cardIndex > 0 ? 1 : 0.25)
-        .onClick(() => { if (this.vm.cardIndex > 0) { this.vm.cardIndex--; this.currentGradient = this.vm.getCardGradient(this.vm.cardIndex); this.vm.markAsRead(this.vm.cards[this.vm.cardIndex].id) } })
+        .onClick(() => { if (this.vm.cardIndex > 0) { this.vm.cardIndex--; this.currentGradient = this.vm.getCardGradient(this.vm.cardIndex); this.vm.markAsRead(this.vm.cards[this.vm.cardIndex].id); this.vm.tryGenerate() } })
 
       // 中间计数
       Text(`${this.vm.cardIndex + 1} / ${this.vm.cards.length}`)
-        .fontSize(14).fontWeight(500).fontColor('#9CA3AF')
+        .fontSize(14).fontWeight(500).fontColor($r('app.color.text_tertiary'))
         .margin({ left: 24, right: 24 })
 
       Button() { Image($r('app.media.chevronright2')).width(20).height(20) }
@@ -190,7 +237,7 @@ export struct BrowseTab {
         .shadow({ radius: 12, color: 'rgba(0,0,0,0.1)', offsetY: 4 })
         .enabled(this.vm.cardIndex < this.vm.cards.length - 1)
         .opacity(this.vm.cardIndex < this.vm.cards.length - 1 ? 1 : 0.25)
-        .onClick(() => { if (this.vm.cardIndex < this.vm.cards.length - 1) { this.vm.cardIndex++; this.currentGradient = this.vm.getCardGradient(this.vm.cardIndex); this.vm.markAsRead(this.vm.cards[this.vm.cardIndex].id) } })
+        .onClick(() => { if (this.vm.cardIndex < this.vm.cards.length - 1) { this.vm.cardIndex++; this.currentGradient = this.vm.getCardGradient(this.vm.cardIndex); this.vm.markAsRead(this.vm.cards[this.vm.cardIndex].id); this.vm.tryGenerate() } })
     }
     .width('100%').justifyContent(FlexAlign.Center).padding({ bottom: 8, top: 2 })
   }
@@ -206,7 +253,7 @@ export struct BrowseTab {
         .onClick(() => { if (this.detailIdx > 0) { this.detailIdx--; this.currentGradient = this.vm.getCardGradient(this.detailIdx); this.vm.markAsRead(this.vm.cards[this.detailIdx].id) } })
 
       Text(`${this.detailIdx + 1} / ${this.vm.cards.length}`)
-        .fontSize(14).fontWeight(500).fontColor('#9CA3AF')
+        .fontSize(14).fontWeight(500).fontColor($r('app.color.text_tertiary'))
         .margin({ left: 24, right: 24 })
 
       Button() { Image($r('app.media.chevronright2')).width(20).height(20) }

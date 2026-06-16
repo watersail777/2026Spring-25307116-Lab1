@@ -6,6 +6,7 @@ import { AppViewModel, CardGradient } from '../../model/AppViewModel'
 @ComponentV2
 export struct FavoritesTab {
   @Require @Param vm: AppViewModel
+  @Param isTablet: boolean = false
   @Local deleteMode: boolean = false
   @Local selectedIds: string[] = []
   @Local showConfirm: boolean = false
@@ -63,6 +64,21 @@ export struct FavoritesTab {
           Column() {
             Text('还没有收藏').fontSize(15).fontColor('#9CA3AF')
           }.width('100%').layoutWeight(1).justifyContent(FlexAlign.Center)
+        } else if (this.isTablet) {
+          // 平板：2 列网格
+          Scroll() {
+            Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start }) {
+              ForEach(this.vm.favorites, (card: KnowledgeItem, idx: number) => {
+                Row() {
+                  this.BookmarkCard(card, this.vm.getCardGradient(idx % 6), idx)
+                }
+                .width('47%')
+                .margin({ left: '1.5%', right: '1.5%', bottom: 10 })
+              })
+            }
+            .width('100%').padding({ left: 8, right: 8, top: 4, bottom: 4 })
+          }
+          .width('100%').layoutWeight(1).align(Alignment.Top)
         } else {
           Scroll() {
             Column() {

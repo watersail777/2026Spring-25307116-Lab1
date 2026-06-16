@@ -73,6 +73,15 @@ export class LocalStore {
     return cards
   }
 
+  static clearAllCards(): void {
+    const ids: string[] = LocalStore.getCardIds()
+    for (let i = 0; i < ids.length; i++) {
+      LocalStore.store?.deleteSync(`card_${ids[i]}`)
+    }
+    LocalStore.setCardIds([])
+    LocalStore.store?.flush()
+  }
+
   // ── 收藏 ──
 
   static toggleFavorite(cardId: string): boolean {
@@ -132,6 +141,16 @@ export class LocalStore {
     return str.length > 0 ? parseJSON<UserProfile>(str) : new UserProfile()
   }
 
+  static saveTheme(name: string): void {
+    LocalStore.store?.putSync('selectedTheme', name)
+    LocalStore.store?.flush()
+  }
+
+  static getTheme(): string {
+    const val: preferences.ValueType = LocalStore.store?.getSync('selectedTheme', '马卡龙暖调') ?? '马卡龙暖调'
+    return typeof val === 'string' ? val : '马卡龙暖调'
+  }
+
   // ── 附近圈卡片 ──
 
   static saveNearbyCards(cards: KnowledgeItem[]): void {
@@ -179,5 +198,39 @@ export class LocalStore {
     const val: preferences.ValueType = LocalStore.store?.getSync(READ_HISTORY_KEY, '[]') ?? '[]'
     const str: string = typeof val === 'string' ? val : '[]'
     return parseJSON<ReadHistoryEntry[]>(str)
+  }
+
+  // ── 连续天数 ──
+
+  static getStreak(): number {
+    const val: preferences.ValueType = LocalStore.store?.getSync('streak', 0) ?? 0
+    return typeof val === 'number' ? val : 0
+  }
+
+  static getLastActiveDate(): string {
+    const val: preferences.ValueType = LocalStore.store?.getSync('last_active_date', '') ?? ''
+    return typeof val === 'string' ? val : ''
+  }
+
+  static updateStreak(): number {
+    const today = new Date().toISOString().split('T')[0]
+    const lastDate = LocalStore.getLastActiveDate()
+    let streak = LocalStore.getStreak()
+
+    if (lastDate === today) {
+      return streak
+    }
+
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+    if (lastDate === yesterday) {
+      streak += 1
+    } else {
+      streak = 1
+    }
+
+    LocalStore.store?.putSync('streak', streak)
+    LocalStore.store?.putSync('last_active_date', today)
+    LocalStore.store?.flush()
+    return streak
   }
 }

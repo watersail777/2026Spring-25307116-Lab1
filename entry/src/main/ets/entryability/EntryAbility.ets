@@ -1,4 +1,4 @@
-import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit'
+import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 import { window } from '@kit.ArkUI'
 import { LocalStore } from '../data/LocalStore'
@@ -8,6 +8,11 @@ const DOMAIN = 0x0000
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    try {
+      this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET)
+    } catch (err) {
+      hilog.error(DOMAIN, 'Zhiyu', 'Failed to set colorMode: %{public}s', JSON.stringify(err))
+    }
     hilog.info(DOMAIN, 'Zhiyu', '%{public}s', 'Ability onCreate')
     this.extractCardId(want)
   }
@@ -48,6 +53,13 @@ export default class EntryAbility extends UIAbility {
       }
       hilog.info(DOMAIN, 'Zhiyu', 'Succeeded in loading content')
     })
+  }
+
+  onContinue(wantParams: Record<string, Object>): AbilityConstant.OnContinueResult {
+    hilog.info(DOMAIN, 'Zhiyu', '%{public}s', 'Ability onContinue')
+    wantParams['continueTab'] = AppStorage.get<number>('currentTab') ?? 0
+    wantParams['continueCardIndex'] = AppStorage.get<number>('currentCardIndex') ?? 0
+    return AbilityConstant.OnContinueResult.AGREE
   }
 
   onDestroy(): void { hilog.info(DOMAIN, 'Zhiyu', '%{public}s', 'Ability onDestroy') }
