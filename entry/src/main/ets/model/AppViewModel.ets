@@ -5,6 +5,7 @@ import { LocationHelper } from '../utils/LocationHelper'
 import { FallbackData } from '../data/FallbackData'
 import { DeepSeekAPI } from '../api/DeepSeekAPI'
 import pasteboard from '@ohos.pasteboard'
+import { vibrator } from '@kit.SensorServiceKit'
 
 export interface CardGradient {
   gradientStart: string
@@ -40,14 +41,13 @@ export class AppViewModel {
   @Trace favPercent: number = 0
   @Trace avatarUri: string = ''
   @Trace bgUri: string = ''
+  @Trace vibrateEnabled: boolean = true
 
   // ── AI 卡片生成 ──
   private generating: boolean = false
 
   static readonly TOPICS: string[] = [
-    '天文', '生物', '人体', '医学', '自然', '物理', '化学', '历史', '文化', '文学',
-    '饮食', '食品', '植物', '基因', '材料', '电影', '体育', '法医', '动物', '海洋',
-    '地理', '语言', '科技', '音乐', '心理', '科学假说'
+    '人体·医学', '生物·自然', '天文·物理', '饮食', '文化·历史', '化学·材料', '万象'
   ]
 
   /**
@@ -55,8 +55,8 @@ export class AppViewModel {
    * 剩余未浏览 < 10 且未在生成中时，异步生成一张
    */
   tryGenerate(): void {
-    const remaining = this.cards.length - this.cardIndex
-    if (remaining < 15 && this.cards.length > 0 && !this.generating) {
+    // 总卡片池 < 15 时触发 AI 生成（不依赖筛选视图的位置）
+    if (this.cards.length < 15 && this.cards.length > 0 && !this.generating) {
       this.generateCard()
     }
   }
@@ -72,6 +72,7 @@ export class AppViewModel {
           card.id = 'ai-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6)
           this.cards.push(card)
           LocalStore.saveCard(card)
+          this.applyCategoryFilter()
           this.refreshStats()
         }
       }
@@ -84,7 +85,7 @@ export class AppViewModel {
 
   // ── 4套卡片配色主题 ──
   static readonly THEMES: Record<string, CardGradient[]> = {
-    '马卡龙暖调': [
+    '马卡龙暖': [
       { gradientStart: '#f0e6f4', gradientEnd: '#e0d2e8', borderColor: '#d8c8e0', borderRgb: '216,200,224', accentColor: '#C9A8D8', titleColor: '#2D1B3D', bodyColor: '#5B3D6E', name: '天文' },
       { gradientStart: '#e6f0e6', gradientEnd: '#d0e2d0', borderColor: '#c0d4c0', borderRgb: '192,212,192', accentColor: '#7DBE7D', titleColor: '#1A3320', bodyColor: '#3A6B3A', name: '生物' },
       { gradientStart: '#f6f0e0', gradientEnd: '#ebe0c8', borderColor: '#ddd0b8', borderRgb: '221,208,184', accentColor: '#D4A843', titleColor: '#3D2A00', bodyColor: '#6B4A10', name: '自然' },
@@ -101,12 +102,12 @@ export class AppViewModel {
       { gradientStart: '#081418', gradientEnd: '#0a1c20', borderColor: '#103038', borderRgb: '16,48,56', accentColor: '#2dd4bf', titleColor: '#d0fff8', bodyColor: '#a0e8e0', name: '历史' },
     ],
     '极简素白': [
-      { gradientStart: '#fafaf8', gradientEnd: '#f4f2f0', borderColor: '#e8e4e0', borderRgb: '232,228,224', accentColor: '#94a89a', titleColor: '#2a2a28', bodyColor: '#5a5a55', name: '天文' },
-      { gradientStart: '#f8fafc', gradientEnd: '#f0f4f6', borderColor: '#e4e8ec', borderRgb: '228,232,236', accentColor: '#8a9e88', titleColor: '#252a28', bodyColor: '#525a55', name: '生物' },
-      { gradientStart: '#faf6f0', gradientEnd: '#f4ece2', borderColor: '#e8dcc8', borderRgb: '232,220,200', accentColor: '#b8a090', titleColor: '#3a3028', bodyColor: '#6a5a48', name: '自然' },
-      { gradientStart: '#faf6f5', gradientEnd: '#f4ecea', borderColor: '#e8dcd8', borderRgb: '232,220,216', accentColor: '#b89890', titleColor: '#3a2825', bodyColor: '#6a4840', name: '章鱼' },
-      { gradientStart: '#f6f6fc', gradientEnd: '#eeecf4', borderColor: '#ded8e8', borderRgb: '222,216,232', accentColor: '#9890b8', titleColor: '#1a1840', bodyColor: '#484060', name: '物理' },
-      { gradientStart: '#f4faf8', gradientEnd: '#e8f2f0', borderColor: '#d8e8e4', borderRgb: '216,232,228', accentColor: '#889e96', titleColor: '#182820', bodyColor: '#405a50', name: '历史' },
+      { gradientStart: '#fafaf8', gradientEnd: '#f4f2f0', borderColor: '#eae8e4', borderRgb: '234,232,228', accentColor: '#a09890', titleColor: '#2c2a26', bodyColor: '#6e6a64', name: '天文' },
+      { gradientStart: '#f8faf7', gradientEnd: '#f0f2ee', borderColor: '#e4e6e0', borderRgb: '228,230,224', accentColor: '#8e9688', titleColor: '#282a24', bodyColor: '#5a5e54', name: '生物' },
+      { gradientStart: '#faf8f4', gradientEnd: '#f2ece4', borderColor: '#e8e0d6', borderRgb: '232,224,214', accentColor: '#b4a494', titleColor: '#3c3428', bodyColor: '#70624e', name: '自然' },
+      { gradientStart: '#faf8f7', gradientEnd: '#f2ecea', borderColor: '#e8e0dc', borderRgb: '232,224,220', accentColor: '#b4a09a', titleColor: '#3c2c28', bodyColor: '#70504a', name: '章鱼' },
+      { gradientStart: '#f8f8fa', gradientEnd: '#f0eef4', borderColor: '#e4e0ea', borderRgb: '228,224,234', accentColor: '#9694a8', titleColor: '#201e34', bodyColor: '#4e4a5e', name: '物理' },
+      { gradientStart: '#f6faf8', gradientEnd: '#ecf2ee', borderColor: '#dce6e0', borderRgb: '220,230,224', accentColor: '#8c9a92', titleColor: '#1c2a22', bodyColor: '#3e5246', name: '历史' },
     ],
     '森林晨露': [
       { gradientStart: '#e0ece4', gradientEnd: '#d0ded4', borderColor: '#c0d0c4', borderRgb: '192,208,196', accentColor: '#5c8a67', titleColor: '#1a3020', bodyColor: '#3a5a40', name: '天文' },
@@ -118,11 +119,139 @@ export class AppViewModel {
     ],
   }
 
-  @Trace selectedTheme: string = '马卡龙暖调'
+  @Trace selectedTheme: string = '马卡龙暖'
+
+  // ── 分类筛选 ──
+  @Trace selectedCategory: string = '全部'
+  @Trace filteredCards: KnowledgeItem[] = []
+  @Trace filteredCardIndex: number = 0
+
+  getAvailableCategories(): string[] {
+    const seen: Set<string> = new Set()
+    seen.add('全部')
+    for (const c of this.cards) {
+      const mainCat = c.category.split('·')[0]
+      if (mainCat.length > 0 && !seen.has(mainCat)) {
+        seen.add(mainCat)
+      }
+    }
+    return Array.from(seen)
+  }
+
+  selectCategory(cat: string): void {
+    this.selectedCategory = cat
+    this.applyCategoryFilter()
+  }
+
+  applyCategoryFilter(): void {
+    if (this.selectedCategory === '全部') {
+      this.filteredCards = this.cards
+    } else {
+      this.filteredCards = this.cards.filter(c => {
+        return c.category === this.selectedCategory ||
+          c.category.startsWith(this.selectedCategory + '·')
+      })
+    }
+    this.filteredCardIndex = 0
+  }
+
+  stepFilteredCard(dir: number): void {
+    if (dir < 0 && this.filteredCardIndex < this.filteredCards.length - 1) {
+      this.filteredCardIndex++
+    } else if (dir > 0 && this.filteredCardIndex > 0) {
+      this.filteredCardIndex--
+    }
+  }
+
+  jumpToFilteredCard(idx: number): void {
+    if (idx >= 0 && idx < this.filteredCards.length) {
+      this.filteredCardIndex = idx
+    }
+  }
 
   getCardGradient(index: number): CardGradient {
-    const theme = AppViewModel.THEMES[this.selectedTheme] ?? AppViewModel.THEMES['马卡龙暖调']
+    const theme = AppViewModel.THEMES[this.selectedTheme] ?? AppViewModel.THEMES['马卡龙暖']
     return theme[index % theme.length]
+  }
+
+  // ── 主题适配：Profile 页颜色 ──
+
+  /** 个人中心头部渐变（跟随选中主题变化） */
+  getProfileHeaderGradient(): [string, number][] {
+    switch (this.selectedTheme) {
+      case '夜间霓虹':
+        return [['#1a1030',0],['#1c143a',0.2],['#1e1844',0.4],['#201c50',0.6],['#1e2058',0.8],['#1c2460',1]]
+      case '极简素白':
+        return [['#d8d4ce',0],['#d0cbc4',0.2],['#c4beb6',0.4],['#b8b2aa',0.6],['#aca69e',0.8],['#a09a92',1]]
+      case '森林晨露':
+        return [['#3a5a40',0],['#406048',0.2],['#4a6a50',0.4],['#547458',0.6],['#5e7e60',0.8],['#688868',1]]
+      default: // 马卡龙暖
+        return [['#d4855e',0],['#c97a6a',0.15],['#b8686e',0.3],['#9b5e78',0.5],['#7d5588',0.7],['#6b4d92',1]]
+    }
+  }
+
+  /** 主题对应的阅读统计面板背景色 */
+  getProfilePanelBg(): string {
+    switch (this.selectedTheme) {
+      case '夜间霓虹': return '#1e1c2a'
+      case '极简素白': return '#fafaf7'
+      case '森林晨露': return '#e8f0e8'
+      default: return '#fffdf9'
+    }
+  }
+
+  /** 主题对应的统计标题色 */
+  getProfileTitleColor(): string {
+    switch (this.selectedTheme) {
+      case '夜间霓虹': return '#e0d8f0'
+      case '极简素白': return '#2c2a26'
+      case '森林晨露': return '#1a3020'
+      default: return '#3a3028'
+    }
+  }
+
+  /** 主题对应的统计副标题色 */
+  getProfileBodyColor(): string {
+    switch (this.selectedTheme) {
+      case '夜间霓虹': return '#8a8098'
+      case '极简素白': return '#8a8680'
+      case '森林晨露': return '#6a7a68'
+      default: return '#a09888'
+    }
+  }
+
+  /** 主题对应的分割线色 */
+  getProfileDividerColor(): string {
+    switch (this.selectedTheme) {
+      case '夜间霓虹': return '#2a2838'
+      case '极简素白': return '#e8e6e2'
+      case '森林晨露': return '#c0d0c0'
+      default: return '#e8e4dc'
+    }
+  }
+
+  /** 环形图三色（已阅读 / 收藏率 / 本周活跃） */
+  getRingColors(): [string, string, string] {
+    switch (this.selectedTheme) {
+      case '夜间霓虹':
+        return ['#60a5fa', '#fb923c', '#4ade80']
+      case '极简素白':
+        return ['#908e86', '#b2a696', '#88948a']
+      case '森林晨露':
+        return ['#5c8a67', '#8e7a5a', '#6a9e78']
+      default: // 马卡龙暖
+        return ['#5b8cbf', '#c4945a', '#6b9e78']
+    }
+  }
+
+  /** 环形图背景圈颜色 */
+  getRingBgColor(): string {
+    switch (this.selectedTheme) {
+      case '夜间霓虹': return '#2a2838'
+      case '极简素白': return '#e8e6e2'
+      case '森林晨露': return '#c8d8c8'
+      default: return '#e8e4dc'
+    }
   }
 
   // ── 初始化 ──
@@ -140,14 +269,16 @@ export class AppViewModel {
       if (saved.length > 0 && valid.length < saved.length) {
         LocalStore.clearAllCards()
       }
-      const all = FallbackData.getAll(31)
+      const all = FallbackData.getAll(99)
       for (const c of all) {
         LocalStore.saveCard(c)
       }
       this.cards = all
     }
     this.selectedTheme = LocalStore.getTheme()
+    this.vibrateEnabled = LocalStore.getVibrateEnabled()
     this.streak = LocalStore.updateStreak()
+    this.applyCategoryFilter()
   }
 
   /**
@@ -190,28 +321,36 @@ export class AppViewModel {
   // ── 卡片切换 ──
 
   handleSwipe(dir: number): void {
-    if (dir < 0 && this.cardIndex < this.cards.length - 1) {
-      this.cardIndex++
-    } else if (dir > 0 && this.cardIndex > 0) {
-      this.cardIndex--
+    if (dir < 0 && this.filteredCardIndex < this.filteredCards.length - 1) {
+      this.filteredCardIndex++
+    } else if (dir > 0 && this.filteredCardIndex > 0) {
+      this.filteredCardIndex--
     }
   }
 
   // ── 收藏 ──
 
   handleFavorite(): void {
-    if (this.cards.length === 0) {
+    if (this.filteredCards.length === 0) {
       return
     }
-    const card = this.cards[this.cardIndex]
+    const card = this.filteredCards[this.filteredCardIndex]
     const isFav = LocalStore.toggleFavorite(card.id)
     card.isFavorited = isFav
+    this.tryVibrate()
     this.showToast(isFav ? '已收藏' : '已取消')
   }
 
   removeFavorite(cardId: string): void {
     LocalStore.toggleFavorite(cardId)
     this.favorites = this.favorites.filter(c => c.id !== cardId)
+  }
+
+  tryVibrate(): void {
+    if (!this.vibrateEnabled) return
+    try {
+      vibrator.startVibration({ type: 'time', duration: 12 }, { usage: 'touch' })
+    } catch (_e) { /* 震动调用失败不阻塞 */ }
   }
 
   loadFavorites(): void {
@@ -229,12 +368,13 @@ export class AppViewModel {
   // ── 点赞 ──
 
   handleLike(): void {
-    if (this.cards.length === 0) {
+    if (this.filteredCards.length === 0) {
       return
     }
-    const card = this.cards[this.cardIndex]
+    const card = this.filteredCards[this.filteredCardIndex]
     const liked = LocalStore.toggleLike(card.id)
     card.isLiked = liked
+    this.tryVibrate()
     if (liked) {
       card.likeCount++
       this.showToast('已点赞')
@@ -247,10 +387,10 @@ export class AppViewModel {
   // ── 分享 ──
 
   shareToSystem(): void {
-    if (this.cards.length === 0) {
+    if (this.filteredCards.length === 0) {
       return
     }
-    const card = this.cards[this.cardIndex]
+    const card = this.filteredCards[this.filteredCardIndex]
     const text = `【知域】${card.title}\n\n${card.content}\n\n— 来自「知域」冷知识科普`
     const data: pasteboard.PasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text)
     pasteboard.getSystemPasteboard().setData(data)
@@ -258,10 +398,10 @@ export class AppViewModel {
   }
 
   shareToNearby(): void {
-    if (this.cards.length === 0) {
+    if (this.filteredCards.length === 0) {
       return
     }
-    const card = this.cards[this.cardIndex]
+    const card = this.filteredCards[this.filteredCardIndex]
     card.authorName = this.profile.nickname
     const nearby = LocalStore.getNearbyCards()
     nearby.unshift(card)
@@ -392,9 +532,12 @@ export class AppViewModel {
   // ── Widget 跳转 ──
 
   jumpToCard(cardId: string): void {
-    for (let i = 0; i < this.cards.length; i++) {
-      if (this.cards[i].id === cardId) {
-        this.cardIndex = i
+    // 先在全部卡片中查找，重置筛选为"全部"
+    this.selectedCategory = '全部'
+    this.applyCategoryFilter()
+    for (let i = 0; i < this.filteredCards.length; i++) {
+      if (this.filteredCards[i].id === cardId) {
+        this.filteredCardIndex = i
         this.currentTab = 0
         break
       }

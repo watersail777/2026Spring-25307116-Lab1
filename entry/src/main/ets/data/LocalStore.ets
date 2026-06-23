@@ -147,8 +147,40 @@ export class LocalStore {
   }
 
   static getTheme(): string {
-    const val: preferences.ValueType = LocalStore.store?.getSync('selectedTheme', '马卡龙暖调') ?? '马卡龙暖调'
-    return typeof val === 'string' ? val : '马卡龙暖调'
+    const val: preferences.ValueType = LocalStore.store?.getSync('selectedTheme', '马卡龙暖') ?? '马卡龙暖'
+    return typeof val === 'string' ? val : '马卡龙暖'
+  }
+
+  // ── 震动反馈 ──
+
+  static saveVibrateEnabled(on: boolean): void {
+    LocalStore.store?.putSync('vibrate_enabled', on)
+    LocalStore.store?.flush()
+  }
+
+  static getVibrateEnabled(): boolean {
+    const val: preferences.ValueType = LocalStore.store?.getSync('vibrate_enabled', true) ?? true
+    return typeof val === 'boolean' ? val : true
+  }
+
+  // ── 数据管理 ──
+
+  static clearReadHistory(): void {
+    LocalStore.store?.putSync(READ_HISTORY_KEY, '[]')
+    LocalStore.store?.flush()
+  }
+
+  static resetStats(): void {
+    LocalStore.store?.putSync('streak', 0)
+    LocalStore.store?.putSync('last_active_date', '')
+    // 清除所有点赞记录
+    const cardIds: string[] = LocalStore.getCardIds()
+    for (let i = 0; i < cardIds.length; i++) {
+      LocalStore.store?.deleteSync(`like_${cardIds[i]}`)
+    }
+    // 清除收藏
+    LocalStore.setFavIds([])
+    LocalStore.store?.flush()
   }
 
   // ── 附近圈卡片 ──
