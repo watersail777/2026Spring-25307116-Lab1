@@ -52,11 +52,24 @@ export class AppViewModel {
 
   /**
    * 尝试触发 AI 卡片生成（由 UI 层在切换卡片后调用）
-   * 剩余未浏览 < 10 且未在生成中时，异步生成一张
+   * 剩余未浏览 < 20 且未在生成中时，异步生成一张
    */
   tryGenerate(): void {
-    // 总卡片池 < 15 时触发 AI 生成（不依赖筛选视图的位置）
-    if (this.cards.length < 15 && this.cards.length > 0 && !this.generating) {
+    if (this.cards.length === 0 || this.generating) {
+      return
+    }
+    const history = LocalStore.getReadHistory()
+    const readIds: Set<string> = new Set()
+    for (const h of history) {
+      readIds.add(h.cardId)
+    }
+    let unread = 0
+    for (const c of this.cards) {
+      if (!readIds.has(c.id)) {
+        unread++
+      }
+    }
+    if (unread < 20) {
       this.generateCard()
     }
   }
@@ -72,7 +85,12 @@ export class AppViewModel {
           card.id = 'ai-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6)
           this.cards.push(card)
           LocalStore.saveCard(card)
-          this.applyCategoryFilter()
+          // 更新 filteredCards 但不重置位置
+          if (this.selectedCategory === '全部' ||
+              card.category === this.selectedCategory ||
+              card.category.startsWith(this.selectedCategory + '·')) {
+            this.filteredCards = [...this.filteredCards, card]
+          }
           this.refreshStats()
         }
       }

@@ -145,7 +145,7 @@ export struct ProfileTab {
       .width('100%').padding({ top: 28, bottom: 36, left: 24, right: 24 })
       .justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
     }
-    .width('100%')
+    .width('100%').height(240).clip(true)
     .linearGradient({ angle: 155, colors: this.vm.getProfileHeaderGradient() })
   }
 
