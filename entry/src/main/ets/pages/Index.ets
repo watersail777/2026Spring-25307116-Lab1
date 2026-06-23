@@ -1,6 +1,8 @@
 import { AppViewModel } from '../model/AppViewModel'
 import { SearchTab } from './tabs/SearchTab'
 import { ResultsTab } from './tabs/ResultsTab'
+import { FavoritesTab } from './tabs/FavoritesTab'
+import { BottomNavBar } from '../components/BottomNavBar'
 import { DataLoader } from '../data/DataLoader'
 import { GlobalThis } from '../utils/GlobalThis'
 
@@ -15,6 +17,17 @@ struct Index {
 
   aboutToAppear(): void {
     this.vm.init()
+
+    // widget 深链：跳转到指定 tab
+    const launchTab = AppStorage.get<string>('launchTab')
+    if (launchTab && launchTab.length > 0) {
+      const tab = parseInt(launchTab)
+      if (tab >= 0 && tab <= 2) {
+        this.vm.switchTab(tab)
+        if (tab === 2) this.vm.loadFavorites()
+      }
+      AppStorage.delete('launchTab')
+    }
 
     if (DataLoader.isLoaded) {
       this.splashVisible = false
@@ -80,13 +93,15 @@ struct Index {
           .edgeEffect(EdgeEffect.None)
           .backgroundColor('#F5F5F5')
 
-          Scroll() {
-            ResultsTab({ vm: this.vm, isTablet: true })
+          Column() {
+            // 平板右侧：结果 or 收藏
+            if (this.vm.currentTab === 2) {
+              FavoritesTab({ vm: this.vm, isTablet: true })
+            } else {
+              ResultsTab({ vm: this.vm, isTablet: true })
+            }
           }
           .width('100%').height('100%')
-          .scrollBar(BarState.Off)
-          .edgeEffect(EdgeEffect.None)
-          .backgroundColor('#FFFFFF')
         }
         .showSideBar(true)
         .sideBarWidth('35%')
@@ -97,11 +112,21 @@ struct Index {
         Column() {
           if (this.vm.currentTab === 0) {
             SearchTab({ vm: this.vm, isTablet: false })
-          } else {
+          } else if (this.vm.currentTab === 1) {
             ResultsTab({ vm: this.vm, isTablet: false })
+          } else {
+            FavoritesTab({ vm: this.vm, isTablet: false })
           }
         }
         .width('100%').layoutWeight(1)
+
+        BottomNavBar({
+          currentTab: this.vm.currentTab,
+          onTabChange: (idx: number) => {
+            this.vm.switchTab(idx)
+            if (idx === 2) this.vm.loadFavorites()
+          }
+        })
       }
     }
     .width('100%').height('100%')

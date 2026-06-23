@@ -7,9 +7,12 @@ export struct RouteCard {
   @Event onTap?: () => void
   @Local expanded: boolean = false
   @Local stopList: TrainStop[] = []
+  @Local dualId: string = ''
 
   aboutToAppear(): void {
     this.loadStops()
+    const train = DataLoader.trains.get(this.segment.trainId)
+    this.dualId = train?.trainIdDual ?? ''
   }
 
   private loadStops(): void {
@@ -50,18 +53,26 @@ export struct RouteCard {
     Column() {
       // 头部：车次 + 时长
       Row() {
-        Text(this.segment.trainId)
-          .fontSize(18).fontWeight(700).fontColor('#1A73E8')
-          .padding({ left: 10, right: 10, top: 4, bottom: 4 })
-          .borderRadius(6).backgroundColor('#E8F0FE')
+        Row() {
+          Text(this.segment.trainId)
+            .fontSize(18).fontWeight(700).fontColor('#1A73E8')
+            .padding({ left: 10, right: 10, top: 4, bottom: 4 })
+            .borderRadius(6).backgroundColor('#E8F0FE')
+          if (this.dualId.length > 0) {
+            Text(` / ${this.dualId}`)
+              .fontSize(13).fontWeight(500).fontColor('#999999')
+              .margin({ left: 4 })
+          }
+        }
 
         Blank()
 
         Text(this.formatDuration(this.segment.durationMinutes))
           .fontSize(12).fontColor('#888888')
 
-        Text(this.expanded ? ' ▲' : ' ▼')
-          .fontSize(12).fontColor('#AAAAAA').margin({ left: 6 })
+        Image(this.expanded ? $r('app.media.icon_chevron_right') : $r('app.media.icon_chevron_right'))
+          .width(14).height(14).fillColor('#AAAAAA').margin({ left: 6 })
+          .rotate({ angle: this.expanded ? 270 : 90 })
       }
       .width('100%')
 

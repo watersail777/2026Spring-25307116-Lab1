@@ -132,10 +132,12 @@ export class RouteFinder {
         if (visited.has(nk)) continue
         const newTransfers = RouteFinder.countTransfers(neighbor)
         if (newTransfers > maxTransfers) continue
-        // 车型筛选
+        // 车型筛选（含双编号）
         if (allowedTypes && allowedTypes.length > 0) {
           const typeChar = neighbor.trainId.charAt(0)
-          if (allowedTypes.indexOf(typeChar) < 0) continue
+          const train = DataLoader.trains.get(neighbor.trainId)
+          const dualChar = train?.trainIdDual?.charAt(0) ?? ''
+          if (allowedTypes.indexOf(typeChar) < 0 && (dualChar.length === 0 || allowedTypes.indexOf(dualChar) < 0)) continue
         }
         heap.push(neighbor)
       }
@@ -204,6 +206,8 @@ export class RouteFinder {
         seg.trainId = node.trainId
         seg.fromStation = lastSegmentEndStation
         seg.toStation = node.stationName
+        seg.departureDay = depDay
+        seg.arrivalDay = arrDay
         seg.departureTime = depTime + (depDay > 0 ? ` +${depDay}` : '')
         seg.arrivalTime = arrTime + (arrDay > 0 ? ` +${arrDay}` : '')
         seg.durationMinutes = node.timeMinutes - (node.prevNode ? node.prevNode.timeMinutes : startMin)
@@ -213,6 +217,25 @@ export class RouteFinder {
       }
 
       lastSegmentEndStation = node.stationName
+    }
+
+    // 计算换乘间隙
+    for (let si = 1; si < segments.length; si++) {
+      const prevSeg = segments[si - 1]
+      const currSeg = segments[si]
+      const prevArrAbs = prevSeg.arrivalDay * MINUTES_PER_DAY + RouteFinder.parseTimeToMin(prevSeg.arrivalTime.replace(/ \+\d+/, ''))
+      const currDepAbs = currSeg.departureDay * MINUTES_PER_DAY + RouteFinder.parseTimeToMin(currSeg.departureTime.replace(/ \+\d+/, ''))
+      let gap = currDepAbs - prevArrAbs
+      if (gap < 0) gap += MINUTES_PER_DAY
+      currSeg.transferMinutes = gap
+      currSeg.isTransfer = true
+      if (prevSeg.arrivalDay !== currSeg.departureDay) {
+        currSeg.transferType = 'overnight'
+      } else if (gap > 120) {
+        currSeg.transferType = 'long_wait'
+      } else {
+        currSeg.transferType = 'same_station'
+      }
     }
 
     const result = new RouteResult()
@@ -276,6 +299,8 @@ export class RouteFinder {
           seg.trainId = dep.trainId
           seg.fromStation = origin
           seg.toStation = destination
+          seg.departureDay = depDay
+          seg.arrivalDay = arrDay
           seg.departureTime = departureTime + (depDay > 0 ? ` +${depDay}` : '')
           seg.arrivalTime = arrivalTime + (arrDay > 0 ? ` +${arrDay}` : '')
           const dur = (arrDay - depDay) * MINUTES_PER_DAY +

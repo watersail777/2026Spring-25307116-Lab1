@@ -83,8 +83,9 @@ export struct SearchTab {
           Text('[=] 筛选条件')
             .fontSize(13).fontWeight(600).fontColor('#555555')
           Blank()
-          Text(this.vm.showFilter ? '▼' : '▶')
-            .fontSize(11).fontColor('#999999')
+          Image($r('app.media.icon_chevron_right'))
+            .width(14).height(14).fillColor('#999999')
+            .rotate({ angle: this.vm.showFilter ? 270 : 90 })
         }
         .width('100%').padding({ top: 8, bottom: 8 })
         .onClick(() => { this.vm.showFilter = !this.vm.showFilter })

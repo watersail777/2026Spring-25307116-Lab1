@@ -213,6 +213,7 @@ export class DataLoader {
             if (currentStops.length > 0) {
               const train = new Train()
               train.trainId = currentTrainId
+              train.trainIdDual = DataLoader.trainDualMap.get(currentTrainId) ?? ''
               train.stops = currentStops
               DataLoader.trains.set(currentTrainId, train)
             }
@@ -250,6 +251,7 @@ export class DataLoader {
     if (state === 'READING' && currentStops.length > 0) {
       const train = new Train()
       train.trainId = currentTrainId
+      train.trainIdDual = DataLoader.trainDualMap.get(currentTrainId) ?? ''
       train.stops = currentStops
       DataLoader.trains.set(currentTrainId, train)
     }

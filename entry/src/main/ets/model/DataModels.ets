@@ -39,9 +39,11 @@ export class ItinerarySegment {
   toStation: string = ''
   departureTime: string = ''   // "HH:MM"
   arrivalTime: string = ''     // "HH:MM"
+  departureDay: number = 0     // 发车日偏移（相对行程起点）
+  arrivalDay: number = 0       // 到达日偏移
   durationMinutes: number = 0
   isTransfer: boolean = false
-  transferType: string = ''    // '' | 'same_station' | 'same_city'
+  transferType: string = ''    // '' | 'same_station' | 'same_city' | 'overnight' | 'long_wait'
   transferMinutes: number = 0
 }
 

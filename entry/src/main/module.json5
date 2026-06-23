@@ -12,7 +12,8 @@
       "wearable"
     ],
     "deliveryWithInstall": true,
-    "installationFree": false,
+    "installationFree": true,
+    "atomicService": { "preloads": [] },
     "pages": "$profile:main_pages",
     "abilities": [
       {
@@ -24,6 +25,7 @@
         "startWindowIcon": "$media:startIcon",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
+        "continuable": true,
         "skills": [
           {
             "entities": [
@@ -32,6 +34,23 @@
             "actions": [
               "ohos.want.action.home"
             ]
+          }
+        ]
+      },
+      {
+        "name": "InstantAbility",
+        "srcEntry": "./ets/instantability/InstantAbility.ets",
+        "description": "$string:EntryAbility_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:EntryAbility_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "exported": true,
+        "continuable": false,
+        "skills": [
+          {
+            "entities": ["entity.system.home"],
+            "actions": ["ohos.want.action.home"]
           }
         ]
       }

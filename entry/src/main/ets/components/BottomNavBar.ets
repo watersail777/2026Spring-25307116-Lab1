@@ -6,22 +6,37 @@ export struct BottomNavBar {
   build() {
     Row() {
       Column() {
-        Text('🔍').fontSize(20)
+        Image($r('app.media.icon_search'))
+          .width(22).height(22)
+          .fillColor(this.currentTab === 0 ? '#1A73E8' : '#999999')
         Text('查询').fontSize(10)
           .fontWeight(this.currentTab === 0 ? 600 : 400)
           .fontColor(this.currentTab === 0 ? '#1A73E8' : '#999999')
           .margin({ top: 2 })
       }
-      .width('50%').onClick(() => { this.onTabChange?.(0) })
+      .layoutWeight(1).onClick(() => { this.onTabChange?.(0) })
 
       Column() {
-        Text('📋').fontSize(20)
+        Image($r('app.media.icon_results'))
+          .width(22).height(22)
+          .fillColor(this.currentTab === 1 ? '#1A73E8' : '#999999')
         Text('结果').fontSize(10)
           .fontWeight(this.currentTab === 1 ? 600 : 400)
           .fontColor(this.currentTab === 1 ? '#1A73E8' : '#999999')
           .margin({ top: 2 })
       }
-      .width('50%').onClick(() => { this.onTabChange?.(1) })
+      .layoutWeight(1).onClick(() => { this.onTabChange?.(1) })
+
+      Column() {
+        Image($r('app.media.icon_star'))
+          .width(22).height(22)
+          .fillColor(this.currentTab === 2 ? '#1A73E8' : '#999999')
+        Text('收藏').fontSize(10)
+          .fontWeight(this.currentTab === 2 ? 600 : 400)
+          .fontColor(this.currentTab === 2 ? '#1A73E8' : '#999999')
+          .margin({ top: 2 })
+      }
+      .layoutWeight(1).onClick(() => { this.onTabChange?.(2) })
     }
     .width('100%').height(64)
     .backgroundColor('#FFFFFF')

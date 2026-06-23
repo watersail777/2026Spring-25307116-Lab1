@@ -14,6 +14,27 @@ export default class EntryAbility extends UIAbility {
       hilog.error(DOMAIN, 'OnTrack', 'Failed to set colorMode: %{public}s', JSON.stringify(err))
     }
     hilog.info(DOMAIN, 'OnTrack', 'Ability onCreate')
+    this.handleWidgetDeepLink(want)
+  }
+
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    hilog.info(DOMAIN, 'OnTrack', 'Ability onNewWant')
+    this.handleWidgetDeepLink(want)
+  }
+
+  private handleWidgetDeepLink(want: Want): void {
+    if (want.parameters) {
+      const tabParam = want.parameters['tab'] as string
+      if (tabParam && tabParam.length > 0) {
+        AppStorage.setOrCreate('launchTab', parseInt(tabParam))
+      }
+    }
+  }
+
+  onContinue(wantParams: Record<string, Object>): AbilityConstant.OnContinueResult {
+    hilog.info(DOMAIN, 'OnTrack', 'Ability onContinue')
+    wantParams['continueTab'] = AppStorage.get<number>('currentTab') ?? 0
+    return AbilityConstant.OnContinueResult.AGREE
   }
 
   onDestroy(): void {

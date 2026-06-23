@@ -28,6 +28,51 @@ export class AppViewModel {
   @Trace selectedSegmentIndex: number = 0
   @Trace toastMsg: string = ''
   @Trace recentQueries: string[] = []
+  @Trace favorites: RouteResult[] = []
+
+  // ── 收藏 ──
+
+  loadFavorites(): void {
+    const raw = LocalStore.getFavorites()
+    this.favorites = []
+    for (let i = 0; i < raw.length; i++) {
+      try {
+        const parsed = JSON.parse(raw[i]) as RouteResult
+        this.favorites.push(parsed)
+      } catch (_) {
+        // 跳过损坏条目
+      }
+    }
+  }
+
+  removeFavorite(index: number): void {
+    if (index < 0 || index >= this.favorites.length) return
+    const json = JSON.stringify(this.favorites[index])
+    LocalStore.toggleFavorite(json)
+    this.loadFavorites()
+    this.showToast('已删除收藏')
+  }
+
+  isRouteFavorited(route: RouteResult): boolean {
+    const json = JSON.stringify(route)
+    const raw = LocalStore.getFavorites()
+    return raw.indexOf(json) >= 0
+  }
+
+  reSearchFromFavorite(route: RouteResult): void {
+    if (route.segments.length === 0) return
+    this.departureStation = route.segments[0].fromStation
+    this.arrivalStation = route.segments[route.segments.length - 1].toStation
+    this.currentTab = 0
+    this.search()
+  }
+
+  toggleFavorite(route: RouteResult): boolean {
+    const json = JSON.stringify(route)
+    const added = LocalStore.toggleFavorite(json)
+    this.loadFavorites()
+    return added
+  }
 
   @Trace loadingProgress: number = 0
   @Trace loadingText: string = ''
@@ -47,6 +92,7 @@ export class AppViewModel {
 
   init(): void {
     this.recentQueries = LocalStore.getRecentQueries()
+    this.loadFavorites()
     // DataLoader.loadAllAsync is called from Index.ets directly
     if (DataLoader.isLoaded) {
       this.isDataReady = true
@@ -114,10 +160,16 @@ export class AppViewModel {
           }
         }
 
-        // 过滤车型
+        // 过滤车型（含双编号）
         if (typeFilter) {
           allResults = allResults.filter((r: RouteResult) => {
-            return r.segments.every((s: ItinerarySegment) => typeFilter!.indexOf(s.trainId.charAt(0)) >= 0)
+            return r.segments.every((s: ItinerarySegment) => {
+              const typeChar = s.trainId.charAt(0)
+              const train = DataLoader.trains.get(s.trainId)
+              const dualChar = train?.trainIdDual?.charAt(0) ?? ''
+              return typeFilter!.indexOf(typeChar) >= 0 ||
+                (dualChar.length > 0 && typeFilter!.indexOf(dualChar) >= 0)
+            })
           })
         }
 
@@ -236,13 +288,12 @@ export class AppViewModel {
     setTimeout(() => { this.toastMsg = '' }, durationMs)
   }
 
-  // ── 收藏 ──
+  // ── 收藏（向后兼容）
 
   toggleFavoriteCurrent(): void {
     if (this.searchResults.length === 0) return
     const result = this.searchResults[this.selectedResultIndex]
-    const json = JSON.stringify(result)
-    const added = LocalStore.toggleFavorite(json)
+    const added = this.toggleFavorite(result)
     this.showToast(added ? '已收藏' : '已取消')
   }
 }
